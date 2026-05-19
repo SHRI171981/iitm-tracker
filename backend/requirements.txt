@@ -1,0 +1,9 @@
+fastapi
+pydantic
+sqlalchemy
+python-dotenv
+psycopg2-binary
+psycopg2
+uvicorn
+watchfiles
+alembic
