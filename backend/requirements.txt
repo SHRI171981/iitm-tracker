@@ -7,3 +7,5 @@ psycopg2
 uvicorn
 watchfiles
 alembic
+pwdlib[argon2]
+pyjwt
