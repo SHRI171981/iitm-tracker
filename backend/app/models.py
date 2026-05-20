@@ -14,6 +14,7 @@ class User(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     username = Column(String(255), unique=True, nullable=False)
     password_hash = Column(String(128), nullable=False)
+    is_admin = Column(Boolean, default=False)
 
 
 class Student(Base):
