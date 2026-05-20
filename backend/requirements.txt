@@ -9,3 +9,4 @@ watchfiles
 alembic
 pwdlib[argon2]
 pyjwt
+pydantic[email]
