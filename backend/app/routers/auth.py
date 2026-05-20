@@ -14,6 +14,23 @@ router = APIRouter(
 )
 
 
+@router.get("/users", response_model=List[auth.RegisterResponse], status_code=status.HTTP_200_OK)
+async def list_users(db: Session = Depends(get_db)):
+    """Retrieves a list of all registered users."""
+    users = db.query(models.User).all()
+    return [auth.RegisterResponse(id=user.id, username=user.username, name=user.student.name, email=user.student.email, is_admin=user.is_admin) for user in users]
+
+
+@router.get("/users/{user_id}", response_model=auth.RegisterResponse, status_code=status.HTTP_200_OK)
+async def get_user(user_id: UUID, db: Session = Depends(get_db)):
+    """Retrieves details of a specific user by their unique identifier."""
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    return auth.RegisterResponse(id=user.id, username=user.username, name=user.student.name, email=user.student.email, is_admin=user.is_admin)
+
+
 @router.post("/register", response_model=auth.RegisterResponse, status_code=status.HTTP_201_CREATED)
 async def register_user(user: auth.UserEntry, db: Session = Depends(get_db)):
     """Registers a new user with the provided username and password."""
@@ -75,20 +92,3 @@ async def login_user(user: auth.UserEntry, db: Session = Depends(get_db)):
         access_token=access_token,
         token_type="bearer"
     )
-
-
-@router.get("/users", response_model=List[auth.RegisterResponse], status_code=status.HTTP_200_OK)
-async def list_users(db: Session = Depends(get_db)):
-    """Retrieves a list of all registered users."""
-    users = db.query(models.User).all()
-    return [auth.RegisterResponse(id=user.id, username=user.username, name=user.student.name, email=user.student.email, is_admin=user.is_admin) for user in users]
-
-
-@router.get("/users/{user_id}", response_model=auth.RegisterResponse, status_code=status.HTTP_200_OK)
-async def get_user(user_id: UUID, db: Session = Depends(get_db)):
-    """Retrieves details of a specific user by their unique identifier."""
-    user = db.query(models.User).filter(models.User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    
-    return auth.RegisterResponse(id=user.id, username=user.username, name=user.student.name, email=user.student.email, is_admin=user.is_admin)
