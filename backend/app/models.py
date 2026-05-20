@@ -4,10 +4,7 @@ from sqlalchemy import Column, String, Integer, Boolean, DateTime, ForeignKey, T
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-
-# Absolute import from the root module enforcing namespace clarity
 from app.database import Base
-
 
 class User(Base):
     __tablename__ = 'user'
@@ -15,7 +12,7 @@ class User(Base):
     username = Column(String(255), unique=True, nullable=False)
     password_hash = Column(String(128), nullable=False)
     is_admin = Column(Boolean, default=False)
-
+    student = relationship("Student", back_populates="user", uselist=False)
 
 class Student(Base):
     __tablename__ = 'student'
@@ -23,16 +20,15 @@ class Student(Base):
     name = Column(String(100), nullable=False)
     email = Column(String(100), unique=True, nullable=False)
     user_id = Column(UUID(as_uuid=True), ForeignKey('user.id'), nullable=False)
-
     user = relationship("User", back_populates="student")
-
+    student_lectures = relationship("StudentLecture", back_populates="student")
 
 class Course(Base):
     __tablename__ = 'course'
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(100), nullable=False)  
     code = Column(String(20), unique=True, nullable=False)
-
+    weeks = relationship("Week", back_populates="course")
 
 class Week(Base):
     __tablename__ = 'week'
@@ -40,9 +36,8 @@ class Week(Base):
     name = Column(String(100), nullable=False)
     num = Column(Integer, nullable=False)
     course_id = Column(UUID(as_uuid=True), ForeignKey('course.id'), nullable=False)
-
     course = relationship("Course", back_populates="weeks")
-
+    lectures = relationship("Lecture", back_populates="week")
 
 class Lecture(Base):
     __tablename__ = 'lecture'
@@ -50,15 +45,13 @@ class Lecture(Base):
     name = Column(String(100), nullable=False)
     num = Column(Integer, nullable=False)
     week_id = Column(UUID(as_uuid=True), ForeignKey('week.id'), nullable=False)
-
     week = relationship("Week", back_populates="lectures")
-    
+    student_lectures = relationship("StudentLecture", back_populates="lecture")
     
 class StudentLecture(Base):
     __tablename__ = 'student_lecture'
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     student_id = Column(UUID(as_uuid=True), ForeignKey('student.id'), nullable=False)
     lecture_id = Column(UUID(as_uuid=True), ForeignKey('lecture.id'), nullable=False)
-
     student = relationship("Student", back_populates="student_lectures")
     lecture = relationship("Lecture", back_populates="student_lectures")
