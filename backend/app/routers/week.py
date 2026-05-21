@@ -15,13 +15,13 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[week.WeekBase])
-def get_weeks(db: Session = Depends(get_db)):
+async def get_weeks(db: Session = Depends(get_db)):
     weeks = db.query(models.Week).all()
     return weeks
 
 
 @router.get("/{week_id}", response_model=week.WeekBase)
-def get_week(week_id: UUID, db: Session = Depends(get_db)):
+async def get_week(week_id: UUID, db: Session = Depends(get_db)):
     _week = db.query(models.Week).filter(models.Week.id == week_id).first()
     if not _week:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Week not found")
@@ -29,9 +29,9 @@ def get_week(week_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=week.WeekBase, status_code=status.HTTP_201_CREATED)
-def create_week(week_data: week.WeekCreate, db: Session = Depends(get_db)):
-    course = db.query(models.Course).filter(models.Course.id == week_data.course_id).first()
-    if not course:
+async def create_week(week_data: week.WeekCreate, db: Session = Depends(get_db)):
+    _course = db.query(models.Course).filter(models.Course.id == week_data.course_id).first()
+    if not _course:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Associated course not found")
     
     try:
@@ -47,7 +47,7 @@ def create_week(week_data: week.WeekCreate, db: Session = Depends(get_db)):
     
 
 @router.patch("/{week_id}", response_model=week.WeekBase)
-def update_week(week_id: UUID, week_data: week.WeekCreate, db: Session = Depends(get_db)):
+async def update_week(week_id: UUID, week_data: week.WeekCreate, db: Session = Depends(get_db)):
     _week = db.query(models.Week).filter(models.Week.id == week_id).first()
     if not _week:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Week not found")
@@ -70,7 +70,7 @@ def update_week(week_id: UUID, week_data: week.WeekCreate, db: Session = Depends
     
 
 @router.delete("/{week_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_week(week_id: UUID, db: Session = Depends(get_db)):
+async def delete_week(week_id: UUID, db: Session = Depends(get_db)):
     _week = db.query(models.Week).filter(models.Week.id == week_id).first()
     if not _week:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Week not found")

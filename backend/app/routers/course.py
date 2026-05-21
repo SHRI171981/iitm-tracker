@@ -15,13 +15,13 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[course.CourseBase])
-def get_courses(db: Session = Depends(get_db)):
+async def get_courses(db: Session = Depends(get_db)):
     courses = db.query(models.Course).all()
     return courses
 
 
 @router.get("/{course_id}", response_model=course.CourseBase)
-def get_course(course_id: UUID, db: Session = Depends(get_db)):
+async def get_course(course_id: UUID, db: Session = Depends(get_db)):
     _course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if not _course:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
@@ -29,7 +29,7 @@ def get_course(course_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=course.CourseBase, status_code=status.HTTP_201_CREATED)
-def create_course(course_data: course.CourseCreate, db: Session = Depends(get_db)):
+async def create_course(course_data: course.CourseCreate, db: Session = Depends(get_db)):
     existing_course = db.query(models.Course).filter((models.Course.code == course_data.code) | (models.Course.name == course_data.name)).first()
     if existing_course:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Course code or name already exists")
@@ -47,7 +47,7 @@ def create_course(course_data: course.CourseCreate, db: Session = Depends(get_db
 
 
 @router.patch("/{course_id}", response_model=course.CourseBase)
-def update_course(course_id: UUID, course_data: course.CourseCreate, db: Session = Depends(get_db)):
+async def update_course(course_id: UUID, course_data: course.CourseCreate, db: Session = Depends(get_db)):
     _course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if not _course:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
@@ -69,7 +69,7 @@ def update_course(course_id: UUID, course_data: course.CourseCreate, db: Session
     
 
 @router.delete("/{course_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_course(course_id: UUID, db: Session = Depends(get_db)):
+async def delete_course(course_id: UUID, db: Session = Depends(get_db)):
     _course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if not _course:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
