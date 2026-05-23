@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 from app.database import engine, Base
-from app.routers import auth, course, week, lecture, progress
+from app.routers import auth, course, week, lecture, progress, dependency
 
 # Automatic database schema generation.
 # Executes DDL to create tables defined in models.py if they do not exist.
@@ -30,6 +30,7 @@ app.include_router(course.router)
 app.include_router(week.router)
 app.include_router(lecture.router)
 app.include_router(progress.router)
+app.include_router(dependency.router)
 
 
 @app.get("/api/health")
