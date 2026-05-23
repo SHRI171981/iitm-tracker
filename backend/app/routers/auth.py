@@ -18,7 +18,7 @@ router = APIRouter(
 async def list_users(db: Session = Depends(get_db)):
     """Retrieves a list of all registered users."""
     users = db.query(models.User).all()
-    return [auth.RegisterResponse(id=user.id, username=user.username, name=user.student.name, email=user.student.email, is_admin=user.is_admin) for user in users]
+    return [auth.RegisterResponse(id=user.id, username=user.username, student_id=user.student.id, name=user.student.name, email=user.student.email, is_admin=user.is_admin) for user in users]
 
 
 @router.get("/users/{user_id}", response_model=auth.RegisterResponse, status_code=status.HTTP_200_OK)
@@ -28,7 +28,7 @@ async def get_user(user_id: UUID, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
-    return auth.RegisterResponse(id=user.id, username=user.username, name=user.student.name, email=user.student.email, is_admin=user.is_admin)
+    return auth.RegisterResponse(id=user.id, username=user.username, student_id=user.student.id, name=user.student.name, email=user.student.email, is_admin=user.is_admin)
 
 
 @router.post("/register", response_model=auth.RegisterResponse, status_code=status.HTTP_201_CREATED)
@@ -56,6 +56,7 @@ async def register_user(user: auth.UserEntry, db: Session = Depends(get_db)):
         response_data = auth.RegisterResponse(
             id=new_user.id, 
             username=new_user.username, 
+            student_id=new_student.id,
             name=new_student.name, 
             email=new_student.email, 
             is_admin=new_user.is_admin

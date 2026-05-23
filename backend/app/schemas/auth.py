@@ -38,6 +38,10 @@ class RegisterResponse(BaseModel):
         description="Username of the registered user",
         max_length=255
     )
+    student_id: UUID = Field(
+        ...,
+        description="Unique identifier for the associated student profile"
+    )
     name: str = Field(
         ...,
         description="Full name of the registered user",
