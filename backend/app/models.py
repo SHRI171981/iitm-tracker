@@ -28,7 +28,11 @@ class Course(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(100), nullable=False)  
     code = Column(String(20), unique=True, nullable=False)
+    
     weeks = relationship("Week", back_populates="course")
+    dependencies_from = relationship("Dependency", foreign_keys="[Dependency.from_course_id]", back_populates="from_course")
+    dependencies_to = relationship("Dependency", foreign_keys="[Dependency.to_course_id]", back_populates="to_course")
+
 
 class Week(Base):
     __tablename__ = 'week'
@@ -56,3 +60,13 @@ class StudentLecture(Base):
     student = relationship("Student", back_populates="student_lectures")
     lecture = relationship("Lecture", back_populates="student_lectures")
     timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class Dependency(Base):
+    __tablename__ = 'dependency'
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    from_course_id = Column(UUID(as_uuid=True), ForeignKey('course.id'), nullable=False)
+    to_course_id = Column(UUID(as_uuid=True), ForeignKey('course.id'), nullable=False)
+
+    from_course = relationship("Course", foreign_keys=[from_course_id], back_populates="dependencies_from")
+    to_course = relationship("Course", foreign_keys=[to_course_id], back_populates="dependencies_to")
