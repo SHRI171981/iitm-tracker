@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // Defines the data contract for course objects, ensuring structural consistency 
 // when integrating with external APIs.
@@ -18,17 +19,15 @@ const CourseList: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedLevel, setSelectedLevel] = useState<string>('All');
+  
+  // Initializes the navigation hook for programmatic routing.
+  const navigate = useNavigate();
 
   // Simulates an asynchronous data fetching operation. 
-  // Replace the setTimeout block with a standard fetch or axios call.
   useEffect(() => {
     const fetchCourses = async () => {
       setIsLoading(true);
       try {
-        // Placeholder for API integration:
-        // const response = await fetch('/api/courses');
-        // const data = await response.json();
-        
         const mockData: Course[] = [
           { id: '1', name: 'Data Structures', code: 'CS201', level: 'Intermediate', weeks: 12, hours: 40, websiteLink: '#', playlistLink: '#' },
           { id: '2', name: 'Intro to Algorithms', code: 'CS301', level: 'Advanced', weeks: 14, hours: 50, websiteLink: '#', playlistLink: '#' },
@@ -120,17 +119,33 @@ const CourseList: React.FC = () => {
               </tr>
             ) : (
               filteredCourses.map((course) => (
-                <tr key={course.id} className="hover:bg-slate-50 transition-colors duration-150">
+                <tr 
+                  key={course.id} 
+                  onClick={() => navigate(`/courses/${course.id}`)}
+                  className="hover:bg-slate-50 transition-colors duration-150 cursor-pointer"
+                >
                   <td className="py-3 px-6 text-sm text-slate-900 font-medium">{course.name}</td>
                   <td className="py-3 px-6 text-sm text-slate-600 font-mono">{course.code}</td>
                   <td className="py-3 px-6 text-sm text-slate-600">{course.level}</td>
                   <td className="py-3 px-6 text-sm text-slate-600">{course.weeks}</td>
                   <td className="py-3 px-6 text-sm text-slate-600">{course.hours}</td>
                   <td className="py-3 px-6 text-sm">
-                    <a href={course.websiteLink} className="text-blue-600 hover:text-blue-800 hover:underline">Link</a>
+                    <a 
+                      href={course.websiteLink} 
+                      onClick={(e) => e.stopPropagation()} 
+                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      Link
+                    </a>
                   </td>
                   <td className="py-3 px-6 text-sm">
-                    <a href={course.playlistLink} className="text-blue-600 hover:text-blue-800 hover:underline">Link</a>
+                    <a 
+                      href={course.playlistLink} 
+                      onClick={(e) => e.stopPropagation()} 
+                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      Link
+                    </a>
                   </td>
                 </tr>
               ))

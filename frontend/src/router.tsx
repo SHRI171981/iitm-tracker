@@ -2,6 +2,7 @@ import React from 'react';
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import CourseList from '@/components/CourseList';
+import CourseDetails from '@/components/CourseDetails';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Dashboard from '@/components/Dashboard';
 import Progress from '@/components/Progress';
@@ -72,6 +73,7 @@ export const router = createBrowserRouter([
           { index: true, element: <Navigate to="/courses" replace /> },
           { path: 'dashboard', element: <Dashboard /> },
           { path: 'courses', element: <CourseList /> },
+          { path: 'courses/:courseId', element: <CourseDetails /> },
           { path: 'progress', element: <Progress /> },
           { path: 'analytics', element: <Analytics /> },
           { path: 'admin', element: <Admin /> },
