@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-const Navbar: React.FC = () => {
-  const [activeItem, setActiveItem] = useState<string>('Dashboard');
+// Defines the contract for the Navbar's expected properties, 
+// ensuring the parent component passes the required state control functions.
+interface NavbarProps {
+  activeItem: string;
+  setActiveItem: (item: string) => void;
+}
 
+const Navbar: React.FC<NavbarProps> = ({ activeItem, setActiveItem }) => {
   const navItems = [
     'Dashboard',
     'Courses',
@@ -16,7 +21,7 @@ const Navbar: React.FC = () => {
     <nav className="w-full h-16 bg-slate-900 flex items-center px-6 shadow-md shrink-0">
       <div className="flex items-center mr-8 border-r border-slate-700 pr-8">
         <span className="text-white font-bold text-lg tracking-widest uppercase">
-          IITM Tracker
+          Portal
         </span>
       </div>
       <ul className="flex flex-row gap-2 h-full items-center">
