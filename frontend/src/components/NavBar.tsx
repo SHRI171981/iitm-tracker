@@ -1,20 +1,20 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
-// Defines the contract for the Navbar's expected properties, 
-// ensuring the parent component passes the required state control functions.
-interface NavbarProps {
-  activeItem: string;
-  setActiveItem: (item: string) => void;
-}
+const NavBar: React.FC = () => {
+  const location = useLocation();
 
-const Navbar: React.FC<NavbarProps> = ({ activeItem, setActiveItem }) => {
+  /**
+   * Routing configuration mapping display labels to exact URL paths.
+   * Centralizing these definitions prevents hardcoded string mismatches.
+   */
   const navItems = [
-    'Dashboard',
-    'Courses',
-    'Progress',
-    'Analytics',
-    'Admin',
-    'Stopwatch'
+    { name: 'Dashboard', path: '/dashboard' },
+    { name: 'Courses', path: '/courses' },
+    { name: 'Progress', path: '/progress' },
+    { name: 'Analytics', path: '/analytics' },
+    { name: 'Admin', path: '/admin' },
+    { name: 'Stopwatch', path: '/stopwatch' }
   ];
 
   return (
@@ -26,19 +26,21 @@ const Navbar: React.FC<NavbarProps> = ({ activeItem, setActiveItem }) => {
       </div>
       <ul className="flex flex-row gap-2 h-full items-center">
         {navItems.map((item) => {
-          const isActive = activeItem === item;
+          // Determines active state based on route prefixes to support nested child routes.
+          const isActive = location.pathname.startsWith(item.path);
+                           
           return (
-            <li
-              key={item}
-              onClick={() => setActiveItem(item)}
-              className={`px-4 py-2 rounded-md text-sm font-medium tracking-wide cursor-pointer transition-colors duration-200 ${
+            <Link
+              key={item.name}
+              to={item.path}
+              className={`px-4 py-2 rounded-md text-sm font-medium tracking-wide transition-colors duration-200 ${
                 isActive
                   ? 'bg-slate-800 text-white shadow-inner'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
               }`}
             >
-              {item}
-            </li>
+              {item.name}
+            </Link>
           );
         })}
       </ul>
@@ -46,4 +48,4 @@ const Navbar: React.FC<NavbarProps> = ({ activeItem, setActiveItem }) => {
   );
 };
 
-export default Navbar;
+export default NavBar;
