@@ -19,6 +19,11 @@ class CourseBase(BaseModel):
         description="Unique code for the course",
         max_length=20
     )
+    num_weeks: int = Field(
+        ...,
+        description="Number of weeks in the course",
+        ge=0
+    )
 
     model_config = ConfigDict(from_attributes=True)
 

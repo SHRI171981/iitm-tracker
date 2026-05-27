@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List
 from uuid import UUID
 from collections import defaultdict
@@ -17,6 +18,8 @@ router = APIRouter(
 @router.get("/all", response_model=List[course.CourseBase])
 async def get_courses(db: Session = Depends(get_db)):
     courses = db.query(models.Course).all()
+    for course in courses:
+        course.num_weeks = len(course.weeks)
     return courses
 
 
@@ -25,6 +28,7 @@ async def get_course(course_id: UUID, db: Session = Depends(get_db)):
     _course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if not _course:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
+    _course.num_weeks = len(_course.weeks)
     return _course
 
 
@@ -39,7 +43,7 @@ async def create_course(course_data: course.CourseCreate, db: Session = Depends(
         db.add(new_course)
         db.commit()
         db.refresh(new_course)
-        
+        new_course.num_weeks = len(new_course.weeks)
         return new_course
     except Exception as e:
         db.rollback()
@@ -61,7 +65,7 @@ async def update_course(course_id: UUID, course_data: course.CourseCreate, db: S
         _course.code = course_data.code if course_data.code is not None else _course.code
         db.commit()
         db.refresh(_course)
-
+        _course.num_weeks = len(_course.weeks)
         return _course
     except Exception as e:
         db.rollback()

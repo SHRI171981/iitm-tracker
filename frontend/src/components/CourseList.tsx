@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiClient } from '@/api/client';
 
 // Defines the data contract for course objects, ensuring structural consistency 
 // when integrating with external APIs.
@@ -8,8 +9,8 @@ interface Course {
   name: string;
   code: string;
   level: string;
-  weeks: number;
-  hours: number;
+  num_weeks: number;
+  num_hours: number;
   websiteLink: string;
   playlistLink: string;
 }
@@ -28,16 +29,9 @@ const CourseList: React.FC = () => {
     const fetchCourses = async () => {
       setIsLoading(true);
       try {
-        const mockData: Course[] = [
-          { id: '1', name: 'Data Structures', code: 'CS201', level: 'Intermediate', weeks: 12, hours: 40, websiteLink: '#', playlistLink: '#' },
-          { id: '2', name: 'Intro to Algorithms', code: 'CS301', level: 'Advanced', weeks: 14, hours: 50, websiteLink: '#', playlistLink: '#' },
-          { id: '3', name: 'Web Development Basics', code: 'WD101', level: 'Beginner', weeks: 8, hours: 25, websiteLink: '#', playlistLink: '#' },
-        ];
-        
-        setTimeout(() => {
-          setCourses(mockData);
-          setIsLoading(false);
-        }, 800);
+        const response = await apiClient.get<Course[]>('/course/all');
+        setCourses(response.data);
+        setIsLoading(false);
       } catch (error) {
         console.error('Failed to fetch courses:', error);
         setIsLoading(false);
@@ -127,8 +121,8 @@ const CourseList: React.FC = () => {
                   <td className="py-3 px-6 text-sm text-slate-900 font-medium">{course.name}</td>
                   <td className="py-3 px-6 text-sm text-slate-600 font-mono">{course.code}</td>
                   <td className="py-3 px-6 text-sm text-slate-600">{course.level}</td>
-                  <td className="py-3 px-6 text-sm text-slate-600">{course.weeks}</td>
-                  <td className="py-3 px-6 text-sm text-slate-600">{course.hours}</td>
+                  <td className="py-3 px-6 text-sm text-slate-600">{course.num_weeks}</td>
+                  <td className="py-3 px-6 text-sm text-slate-600">{course.num_hours}</td>
                   <td className="py-3 px-6 text-sm">
                     <a 
                       href={course.websiteLink} 
