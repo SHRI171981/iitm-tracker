@@ -1,9 +1,16 @@
-import React from 'react';
-import { RouterProvider } from 'react-router-dom';
-import { router } from '@/router';
+import { Outlet } from 'react-router-dom';
+import NavBar from '@/components/nav/NavBar'; 
 
-const App: React.FC = () => {
-  return <RouterProvider router={router} />;
+const App = () => {
+
+  return (
+    <>
+      <NavBar />
+      <div>
+        <Outlet />
+      </div>
+    </>
+  );
 };
 
 export default App;
