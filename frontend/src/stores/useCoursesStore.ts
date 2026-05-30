@@ -66,7 +66,7 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
     try {
       const response = await apiClient.get('/course/all');
       if (response.status === 200) {
-        set({ courses: response.data, loading: false });
+        set({ courses: response.data.sort((a: Course, b: Course) => a.name.localeCompare(b.name)), loading: false });
       }
     } catch (error: any) {
       set({ error: error.response?.data?.message || "Failed to fetch courses", loading: false });
