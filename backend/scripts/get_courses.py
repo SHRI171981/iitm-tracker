@@ -1,9 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import json
-
-
-WEBSITE_URL = "https://study.iitm.ac.in/ds/academics.html#AC1"
+from config import IITM_WEBSITE_URL
 
 
 def scrape_course_page():
@@ -11,7 +9,7 @@ def scrape_course_page():
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
     try:
-        response = requests.get(WEBSITE_URL, headers=headers)
+        response = requests.get(IITM_WEBSITE_URL, headers=headers)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         print(f"Error fetching the course page: {e}")
@@ -43,6 +41,8 @@ def get_all_course_urls(html_content):
             
     # Convert the set back to a list for standard iteration
     return list(course_urls)
+
+
 
 
 
