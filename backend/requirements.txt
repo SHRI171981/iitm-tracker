@@ -12,3 +12,4 @@ pyjwt
 pydantic[email]
 beautifulsoup4
 requests
+httpx
