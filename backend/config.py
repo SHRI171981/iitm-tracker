@@ -9,3 +9,22 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL_NAME")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 IITM_WEBSITE_URL = os.getenv("IITM_WEBSITE_URL")
+
+
+LEVEL_LIST = [
+    "Foundation",
+    "Diploma in Data Science",
+    "Diploma in Programming",
+    "Degree"
+]
+
+# Mapping for course levels to schema naming
+COURSE_LEVEL_MAPPING = {
+    "foundational": "Foundation",
+    "programming": "Diploma in Programming",
+    "data science": "Diploma in Data Science",
+    "core option i": "Degree",
+    "core option ii": "Degree",
+    "Mandatory": "Degree",
+    "elective": "Degree"
+}

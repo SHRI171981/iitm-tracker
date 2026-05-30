@@ -1,7 +1,7 @@
-from pydantic import BaseModel, ConfigDict, Field, EmailStr, ConfigDict
-from typing import List, Optional, Dict, Literal
+from pydantic import BaseModel, ConfigDict, Field, ConfigDict, field_validator
+from typing import Optional
 from uuid import UUID
-from datetime import datetime
+from config import LEVEL_LIST
 
 
 class CourseBase(BaseModel):
@@ -34,9 +34,9 @@ class CourseBase(BaseModel):
         description="Total number of hours for the course",
         ge=0
     )
-    level: Optional[Literal["Foundation", "Diploma in Data Science", "Diploma in Programming", "BSc Degree", "BS Degree", "PG Diploma", "M Tech"]] = Field(
+    level: Optional[str] = Field(
         None,
-        description="Difficulty level of the course",
+        description=f"Difficulty level of the course. Must be one of: {{LEVEL_LIST}}",
         max_length=20,
     )
     website: Optional[str] = Field(
@@ -49,6 +49,12 @@ class CourseBase(BaseModel):
         description="URL to the course playlist",
         max_length=255
     )
+
+    @field_validator('level')
+    def validate_level(cls, value):
+        if value is not None and value not in LEVEL_LIST:
+            raise ValueError(f"Level must be one of {LEVEL_LIST}")
+        return value
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -69,9 +75,9 @@ class CourseCreate(BaseModel):
         description="Number of credits for the course",
         ge=0
     )
-    level: Optional[Literal["Foundation", "Diploma in Data Science", "Diploma in Programming", "BSc Degree", "BS Degree", "PG Diploma", "M Tech"]] = Field(
+    level: Optional[str] = Field(
         None,
-        description="Difficulty level of the course",
+        description=f"Difficulty level of the course. Must be one of: {{LEVEL_LIST}}",
         max_length=20
     )
     website: Optional[str] = Field(
@@ -84,3 +90,9 @@ class CourseCreate(BaseModel):
         description="URL to the course playlist",
         max_length=255
     )
+
+    @field_validator('level')
+    def validate_level(cls, value):
+        if value is not None and value not in LEVEL_LIST:
+            raise ValueError(f"Level must be one of {LEVEL_LIST}")
+        return value
