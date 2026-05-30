@@ -6,6 +6,7 @@ const CourseTableHeader: React.FC = () => {
       <tr>
         <th style={{ padding: '16px', fontWeight: '600', color: '#4a5568' }}>Course Name</th>
         <th style={{ padding: '16px', fontWeight: '600', color: '#4a5568' }}>Code</th>
+        <th style={{ padding: '16px', fontWeight: '600', color: '#4a5568' }}>Credits</th>
         <th style={{ padding: '16px', fontWeight: '600', color: '#4a5568' }}>Level</th>
         <th style={{ padding: '16px', fontWeight: '600', color: '#4a5568' }}># weeks</th>
         <th style={{ padding: '16px', fontWeight: '600', color: '#4a5568' }}># hours</th>

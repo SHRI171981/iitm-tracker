@@ -26,6 +26,7 @@ const CourseTableRow: React.FC<CourseTableRowProps> = ({ course }) => {
     >
       <td style={{ padding: '16px' }}>{course.name}</td>
       <td style={{ padding: '16px' }}>{course.code}</td>
+      <td style={{ padding: '16px' }}>{course.credits}</td>
       <td style={{ padding: '16px' }}>
         <span style={{ padding: '4px 8px', borderRadius: '4px', textTransform: 'capitalize', color: '#2b6cb0', backgroundColor: '#e6fffa' }}>
           {course.level}

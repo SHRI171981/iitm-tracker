@@ -19,6 +19,11 @@ class CourseBase(BaseModel):
         description="Unique code for the course",
         max_length=20
     )
+    credits: Optional[int] = Field(
+        None,
+        description="Number of credits for the course",
+        ge=0
+    )
     num_weeks: int = Field(
         ...,
         description="Number of weeks in the course",
@@ -58,6 +63,11 @@ class CourseCreate(BaseModel):
         None,
         description="Unique code for the course",
         max_length=20
+    )
+    credits: Optional[int] = Field(
+        None,
+        description="Number of credits for the course",
+        ge=0
     )
     level: Optional[Literal["Foundation", "Diploma in Data Science", "Diploma in Programming", "BSc Degree", "BS Degree", "PG Diploma", "M Tech"]] = Field(
         None,
