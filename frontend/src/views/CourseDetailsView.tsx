@@ -14,7 +14,7 @@ const CourseDetailsView: React.FC = () => {
   
   const course = useCourseStore((state) => state.courseDetails[courseId]);
   const weeks = useCourseStore((state) => state.weeksByCourse[courseId] ?? EMPTY_ARRAY);
-  const loading = useCourseStore((state) => state.loading);
+  const isFetchingCourse = useCourseStore((state) => state.fetchingCourse[courseId]);
 
   useEffect(() => {
     if (courseId) {
@@ -23,7 +23,7 @@ const CourseDetailsView: React.FC = () => {
     }
   }, [courseId, fetchCourseDetails, fetchWeeks]);
 
-  if (loading && !course) {
+  if (isFetchingCourse && !course) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-sm font-bold text-slate-400 animate-pulse uppercase tracking-widest">Loading...</div>

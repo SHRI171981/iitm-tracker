@@ -26,7 +26,7 @@ const CourseDataGrid: React.FC = () => {
 
   const levels: ('All' | Course['level'])[] = ['All', 'Beginner', 'Intermediate', 'Advanced'];
 
-  if (loading) {
+  if (loading && courses.length === 0) {
     return (
       <div style={{ width: '100%', maxWidth: '1200px', padding: '32px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
         <p style={{ color: '#4a5568', fontSize: '1.2rem' }}>Loading courses...</p>
