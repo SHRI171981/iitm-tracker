@@ -7,6 +7,8 @@ from scripts.extract_playlist_duration import calculate_total_hours
 import time
 import random
 import asyncio
+from app.database import get_db
+from app.models import Course
 
 
 def scrape_course_page(url):
@@ -129,14 +131,34 @@ def run_scraping_parallel(course_urls, max_workers=5):
     return course_details
 
 
+def bulk_insert_courses(courses_data) -> None:
+    db_generator = get_db()
+    db = next(db_generator)
+
+    try:
+        course_objects = [Course(**item) for item in courses_data]
+        db.add_all(course_objects)
+        db.commit()
+        print(f"Successfully inserted {len(course_objects)} courses.")
+    except Exception as e:
+        db.rollback()
+        print(f"Database insertion failed. Transaction rolled back. Error: {e}")
+    finally:
+        db.close()
+    
+
 if __name__ == "__main__":
     # text = scrape_course_detail_page(course_url="https://study.iitm.ac.in/ds/course_pages/BSCS3003.html")
     # print(text)
     # foundation_courses = get_all_course_urls(text)
     # with open("course_content.html", "w", encoding="utf-8") as f:
     #     f.write(text)
-    with open("course_URLS.json", "r", encoding="utf-8") as f:
-        course_urls = json.load(f)
-    course_details = run_scraping_parallel(course_urls, max_workers=10)
-    with open("course_details.json", "w", encoding="utf-8") as f:
-        json.dump(course_details, f, indent=4)
+    # with open("course_URLS.json", "r", encoding="utf-8") as f:
+    #     course_urls = json.load(f)
+    # course_details = run_scraping_parallel(course_urls, max_workers=10)
+    # with open("course_details.json", "w", encoding="utf-8") as f:
+    #     json.dump(course_details, f, indent=4)
+    with open("course_details.json", "r", encoding="utf-8") as f:
+        course_details = json.load(f)
+    bulk_insert_courses(course_details)
+    
