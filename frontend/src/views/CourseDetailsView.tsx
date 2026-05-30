@@ -11,6 +11,7 @@ const CourseDetailsView: React.FC = () => {
 
   const fetchCourseDetails = useCourseStore((state) => state.fetchCourseDetails);
   const fetchWeeks = useCourseStore((state) => state.fetchWeeks);
+  const fetchStudentProgress = useCourseStore((state) => state.fetchStudentProgress); // Added this
   
   const course = useCourseStore((state) => state.courseDetails[courseId]);
   const weeks = useCourseStore((state) => state.weeksByCourse[courseId] ?? EMPTY_ARRAY);
@@ -18,10 +19,12 @@ const CourseDetailsView: React.FC = () => {
 
   useEffect(() => {
     if (courseId) {
+      // Fetch all required initialization data at once
       fetchCourseDetails(courseId);
       fetchWeeks(courseId);
+      fetchStudentProgress(); 
     }
-  }, [courseId, fetchCourseDetails, fetchWeeks]);
+  }, [courseId, fetchCourseDetails, fetchWeeks, fetchStudentProgress]);
 
   if (isFetchingCourse && !course) {
     return (
