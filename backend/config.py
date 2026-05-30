@@ -25,6 +25,6 @@ COURSE_LEVEL_MAPPING = {
     "data science": "Diploma in Data Science",
     "core option i": "Degree",
     "core option ii": "Degree",
-    "Mandatory": "Degree",
+    "mandatory": "Degree",
     "elective": "Degree"
 }
