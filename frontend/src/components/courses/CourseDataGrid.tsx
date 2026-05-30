@@ -24,7 +24,7 @@ const CourseDataGrid: React.FC = () => {
     return (nameMatch || codeMatch) && levelMatch;
   });
 
-  const levels: ('All' | Course['level'])[] = ["All", "Foundation", "Diploma in Data Science", "Diploma in Programming", "BSc Degree", "BS Degree", "PG Diploma", "M Tech"];
+  const levels: ('All' | Course['level'])[] = ["All", "Foundation", "Diploma in Data Science", "Diploma in Programming", "Degree"];
 
   if (loading && courses.length === 0) {
     return (

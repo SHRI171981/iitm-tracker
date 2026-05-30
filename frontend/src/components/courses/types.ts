@@ -3,7 +3,7 @@ export interface Course {
   name: string;
   code: string;
   credits: number;
-  level: string | "Foundation" | "Diploma in Data Science" | "Diploma in Programming" | "BSc Degree" | "BS Degree" | "PG Diploma" | "M Tech";
+  level: string | "Foundation" | "Diploma in Data Science" | "Diploma in Programming" | "Degree";
   num_weeks: number;
   num_hours: number;
   website: string;
