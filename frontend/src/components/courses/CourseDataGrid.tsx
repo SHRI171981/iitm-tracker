@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
-import { type Course } from '@/components/courses/types';
-import { coursesData } from '@/components/courses/data';
+import React, { useState, useEffect } from 'react';
+import type { Course } from '@/components/courses/types';
+import { useCourseStore } from '@/stores/useCoursesStore';
 import CourseTableHeader from '@/components/courses/CourseTableHeader';
 import CourseTableRow from '@/components/courses/CourseTableRow';
 
 const CourseDataGrid: React.FC = () => {
+  const courses = useCourseStore((state) => state.courses);
+  const loading = useCourseStore((state) => state.loading);
+  const error = useCourseStore((state) => state.error);
+  const fetchCourses = useCourseStore((state) => state.fetchCourses);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState<'All' | Course['level']>('All');
 
-  const filteredCourses = coursesData.filter(course => {
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
+
+  const filteredCourses = courses.filter((course) => {
     const nameMatch = course.name.toLowerCase().includes(searchTerm.toLowerCase());
     const codeMatch = course.code.toLowerCase().includes(searchTerm.toLowerCase());
     const levelMatch = levelFilter === 'All' || course.level === levelFilter;
@@ -16,6 +25,22 @@ const CourseDataGrid: React.FC = () => {
   });
 
   const levels: ('All' | Course['level'])[] = ['All', 'Beginner', 'Intermediate', 'Advanced'];
+
+  if (loading) {
+    return (
+      <div style={{ width: '100%', maxWidth: '1200px', padding: '32px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+        <p style={{ color: '#4a5568', fontSize: '1.2rem' }}>Loading courses...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ width: '100%', maxWidth: '1200px', padding: '32px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+        <p style={{ color: '#e53e3e', fontSize: '1.2rem' }}>{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ width: '100%', maxWidth: '1200px', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', padding: '32px' }}>
@@ -44,12 +69,12 @@ const CourseDataGrid: React.FC = () => {
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <CourseTableHeader />
           <tbody>
-            {filteredCourses.map(course => (
+            {filteredCourses.map((course) => (
               <CourseTableRow key={course.id} course={course} />
             ))}
           </tbody>
         </table>
-        {filteredCourses.length === 0 && (
+        {filteredCourses.length === 0 && !loading && (
           <p style={{ textAlign: 'center', padding: '32px', color: '#718096', fontSize: '1.2rem' }}>
             No courses found matching your criteria.
           </p>
