@@ -1,4 +1,4 @@
-import axios, { InternalAxiosRequestConfig } from "axios";
+import axios, { type InternalAxiosRequestConfig } from "axios";
 
 const apiClient = axios.create({
   baseURL: "http://localhost:8000/api",
