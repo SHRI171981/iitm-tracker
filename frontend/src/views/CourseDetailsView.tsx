@@ -1,23 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCourseStore } from '@/stores/useCoursesStore';
-import { CheckSquare, Square } from 'lucide-react';
+import CourseContentLayout from '@/components/course-details/CourseContentLayout';
+
+const EMPTY_ARRAY: any[] = [];
 
 const CourseDetailsView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const courseId = id || '';
 
-  const course = useCourseStore((state) => state.courseDetails[courseId]);
-  const weeks = useCourseStore((state) => state.weeksByCourse[courseId] || []);
-  const lecturesByWeek = useCourseStore((state) => state.lecturesByWeek);
-  const completedLectures = useCourseStore((state) => state.completedLectures);
-  
   const fetchCourseDetails = useCourseStore((state) => state.fetchCourseDetails);
   const fetchWeeks = useCourseStore((state) => state.fetchWeeks);
-  const fetchLectures = useCourseStore((state) => state.fetchLectures);
-  const toggleLectureCompletion = useCourseStore((state) => state.toggleLectureCompletion);
-
-  const [expandedWeeks, setExpandedWeeks] = useState<Record<string, boolean>>({});
+  
+  const course = useCourseStore((state) => state.courseDetails[courseId]);
+  const weeks = useCourseStore((state) => state.weeksByCourse[courseId] ?? EMPTY_ARRAY);
+  const loading = useCourseStore((state) => state.loading);
 
   useEffect(() => {
     if (courseId) {
@@ -26,106 +23,39 @@ const CourseDetailsView: React.FC = () => {
     }
   }, [courseId, fetchCourseDetails, fetchWeeks]);
 
-  const handleWeekClick = (weekId: string) => {
-    setExpandedWeeks((prev) => ({ ...prev, [weekId]: !prev[weekId] }));
-    if (!lecturesByWeek[weekId]) {
-      fetchLectures(weekId);
-    }
-  };
+  if (loading && !course) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-sm font-bold text-slate-400 animate-pulse uppercase tracking-widest">Loading...</div>
+      </div>
+    );
+  }
 
-  const getWeekProgress = (weekId: string) => {
-    const lectures = lecturesByWeek[weekId] || [];
-    if (lectures.length === 0) return 0;
-    const completed = lectures.filter((l) => completedLectures[l.id]).length;
-    return (completed / lectures.length) * 100;
-  };
-
-  const getOverallProgress = () => {
-    let total = 0;
-    let completed = 0;
-    weeks.forEach((week) => {
-      const lectures = lecturesByWeek[week.id] || [];
-      total += lectures.length;
-      completed += lectures.filter((l) => completedLectures[l.id]).length;
-    });
-    if (total === 0) return 0;
-    return (completed / total) * 100;
-  };
-
-  if (!course) return <div className="p-10 text-center">Loading course...</div>;
+  if (!course) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-sm font-bold text-red-400 uppercase tracking-widest">Course not found</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center py-10 px-4 font-sans text-slate-900">
-      <h1 className="text-4xl font-extrabold tracking-widest uppercase mb-8">
-        Course
-      </h1>
-
-      <div className="w-full max-w-5xl bg-white border border-slate-300 rounded-xl shadow-sm flex overflow-hidden min-h-[600px]">
-        
-        <div className="w-1/3 border-r border-slate-300 p-6 overflow-y-auto">
-          <div className="space-y-6">
-            {weeks.map((week) => (
-              <div key={week.id} className="flex flex-col">
-                <div 
-                  className="flex items-center justify-between cursor-pointer group"
-                  onClick={() => handleWeekClick(week.id)}
-                >
-                  <span className="font-bold text-lg group-hover:text-indigo-600 transition-colors uppercase">
-                    {week.name}
-                  </span>
-                  <div className="w-24 h-2.5 bg-slate-200 rounded-full overflow-hidden border border-slate-300">
-                    <div 
-                      className="h-full bg-slate-800 transition-all duration-300"
-                      style={{ width: `${getWeekProgress(week.id)}%` }}
-                    />
-                  </div>
-                </div>
-
-                {expandedWeeks[week.id] && (
-                  <div className="mt-3 ml-4 space-y-3">
-                    {lecturesByWeek[week.id]?.map((lecture) => (
-                      <div 
-                        key={lecture.id} 
-                        className="flex items-center justify-between text-slate-700"
-                      >
-                        <span className="text-sm uppercase font-medium">
-                          {lecture.name}
-                        </span>
-                        <button 
-                          onClick={() => toggleLectureCompletion(lecture.id)}
-                          className="text-slate-800 hover:scale-110 transition-transform"
-                        >
-                          {completedLectures[lecture.id] ? (
-                            <CheckSquare size={18} />
-                          ) : (
-                            <Square size={18} />
-                          )}
-                        </button>
-                      </div>
-                    ))}
-                    {!lecturesByWeek[week.id] && (
-                      <span className="text-xs text-slate-400">Loading...</span>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+    <div className="h-screen w-full flex flex-col bg-slate-50 font-sans overflow-hidden">
+      <div className="px-8 py-6 bg-white shrink-0 shadow-sm z-10">
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">
+          {course.name}
+        </h1>
+        <div className="flex items-center gap-2 mt-2">
+          <span className="px-2 py-0.5 text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded">
+            {course.code}
+          </span>
+          <span className="px-2 py-0.5 text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 rounded">
+            {course.level}
+          </span>
         </div>
-
-        <div className="w-2/3 p-10 flex flex-col items-center">
-          <h2 className="text-2xl font-black uppercase tracking-wide mb-3">
-            {course.name}
-          </h2>
-          <div className="w-64 h-3 bg-slate-200 rounded-full overflow-hidden border border-slate-300">
-            <div 
-              className="h-full bg-slate-800 transition-all duration-500"
-              style={{ width: `${getOverallProgress()}%` }}
-            />
-          </div>
-        </div>
-
       </div>
+      
+      <CourseContentLayout course={course} weeks={weeks} />
     </div>
   );
 };
