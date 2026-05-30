@@ -29,6 +29,7 @@ class Course(Base):
     name = Column(String(100), nullable=False)  
     code = Column(String(20), unique=True, nullable=False)
     level = Column(String(20), nullable=True)
+    credits = Column(Integer, nullable=True)
     num_hours = Column(Integer, nullable=True)
     website = Column(String(255), nullable=True)
     playlist = Column(String(255), nullable=True)
