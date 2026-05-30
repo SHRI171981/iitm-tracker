@@ -45,6 +45,8 @@ def get_all_course_urls(html_content):
 
 
 def scrape_course_detail_page(course_url):
+    if 'coming-soon' in course_url:
+        return None  # Skip URLs that indicate the course is not yet available
     html_content = scrape_course_page(course_url)
     soup = BeautifulSoup(html_content, 'html.parser')
     

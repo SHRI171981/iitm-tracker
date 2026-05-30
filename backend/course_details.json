@@ -8,12 +8,12 @@
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBZHM1OFsvzGrUGlBehlXd8w"
     },
     {
-        "name": "Introduction to DL and GenAI Project",
-        "code": "BSDA2001P",
-        "level": "Diploma in Data Science",
-        "credits": 2,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSDA2001P.html",
-        "playlist": null
+        "name": "System Commands",
+        "code": "BSSE2001",
+        "level": "Diploma in Programming",
+        "credits": 3,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSSE2001.html",
+        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBajgl-4et7X2BjOIObqlp81"
     },
     {
         "name": "Mathematics for Data Science I",
@@ -24,20 +24,36 @@
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBZYDZo9A0pZ_i0xhstrk5cR"
     },
     {
+        "name": "Large Language Models",
+        "code": "BSDA5004",
+        "level": "Degree",
+        "credits": 4,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSDA5004.html",
+        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBbaMNZoyW2Hizl8DG6ikkjo"
+    },
+    {
+        "name": "Introduction to DL and GenAI Project",
+        "code": "BSDA2001P",
+        "level": "Diploma in Data Science",
+        "credits": 2,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSDA2001P.html",
+        "playlist": null
+    },
+    {
+        "name": "Software Testing",
+        "code": "BSCS3002",
+        "level": "Degree",
+        "credits": 4,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS3002.html",
+        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBai6Crbq3wSw5dG-Ro1CJvT"
+    },
+    {
         "name": "Computational Thinking",
         "code": "BSCS1001",
         "level": "Foundation",
         "credits": 4,
         "website": "https://study.iitm.ac.in/ds/course_pages/BSCS1001.html",
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBYSzaAFqpyQKqmoni-EefS7"
-    },
-    {
-        "name": "Strategies for Professional Growth",
-        "code": "BSGN3001",
-        "level": "Degree",
-        "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSGN3001.html",
-        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBZPxhOs5MF_V6QfRlKSm0zx"
     },
     {
         "name": "Introduction to DL and GenAI",
@@ -48,12 +64,12 @@
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBa9hqi20allqocTSUUt3nWX"
     },
     {
-        "name": "Large Language Models",
-        "code": "BSDA5004",
+        "name": "Strategies for Professional Growth",
+        "code": "BSGN3001",
         "level": "Degree",
         "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSDA5004.html",
-        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBbaMNZoyW2Hizl8DG6ikkjo"
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSGN3001.html",
+        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBZPxhOs5MF_V6QfRlKSm0zx"
     },
     {
         "name": "Machine Learning Foundations",
@@ -62,22 +78,6 @@
         "credits": 4,
         "website": "https://study.iitm.ac.in/ds/course_pages/BSCS2004.html",
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBammhVmBE9f5eezTj2kDfTN"
-    },
-    {
-        "name": "System Commands",
-        "code": "BSSE2001",
-        "level": "Diploma in Programming",
-        "credits": 3,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSSE2001.html",
-        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBajgl-4et7X2BjOIObqlp81"
-    },
-    {
-        "name": "Software Testing",
-        "code": "BSCS3002",
-        "level": "Degree",
-        "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS3002.html",
-        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBai6Crbq3wSw5dG-Ro1CJvT"
     },
     {
         "name": "Mathematical Thinking",
@@ -112,14 +112,6 @@
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBb3ovNQam2c_WcGeiW9OhQo"
     },
     {
-        "name": "Market Research",
-        "code": "BSMS3002",
-        "level": "Degree",
-        "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSMS3002.html",
-        "playlist": "https://youtube.com/playlist?list=PLZ2ps__7DhBYYTW-bxo1D50qqpRRtzl3C"
-    },
-    {
         "name": "Business Data Management",
         "code": "BSMS2001",
         "level": "Diploma in Data Science",
@@ -136,14 +128,6 @@
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBaXTORd_OKXZRXCMh3dGnBZ"
     },
     {
-        "name": "Algorithms for Data Science (ADS)",
-        "code": "BSDA5003",
-        "level": null,
-        "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSDA5003.html",
-        "playlist": null
-    },
-    {
         "name": "Operating System",
         "code": "BSCS4022",
         "level": null,
@@ -152,20 +136,20 @@
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBYcwlZ7GPCBzbowmiiF4BYR"
     },
     {
-        "name": "Design Thinking for Data-Driven App Development",
-        "code": "BSMS4002",
+        "name": "Market Research",
+        "code": "BSMS3002",
         "level": "Degree",
         "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSMS4002.html",
-        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBY8qCdR1QYoUx8tkPST6UJK"
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSMS3002.html",
+        "playlist": "https://youtube.com/playlist?list=PLZ2ps__7DhBYYTW-bxo1D50qqpRRtzl3C"
     },
     {
-        "name": "Deep Learning",
-        "code": "BSCS3004",
-        "level": "Degree",
+        "name": "Algorithms for Data Science (ADS)",
+        "code": "BSDA5003",
+        "level": null,
         "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS3004.html",
-        "playlist": "https://youtube.com/playlist?list=PLZ2ps__7DhBZVxMrSkTIcG6zZBDKUXCnM"
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSDA5003.html",
+        "playlist": null
     },
     {
         "name": "Discrete Mathematics",
@@ -176,12 +160,20 @@
         "playlist": null
     },
     {
-        "name": "Modern Application Development II - Project",
-        "code": "BSCS2006P",
-        "level": "Diploma in Programming",
-        "credits": 2,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS2006P.html",
-        "playlist": null
+        "name": "Deep Learning",
+        "code": "BSCS3004",
+        "level": "Degree",
+        "credits": 4,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS3004.html",
+        "playlist": "https://youtube.com/playlist?list=PLZ2ps__7DhBZVxMrSkTIcG6zZBDKUXCnM"
+    },
+    {
+        "name": "Design Thinking for Data-Driven App Development",
+        "code": "BSMS4002",
+        "level": "Degree",
+        "credits": 4,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSMS4002.html",
+        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBY8qCdR1QYoUx8tkPST6UJK"
     },
     {
         "name": "Business Data Management - Project",
@@ -189,6 +181,14 @@
         "level": "Diploma in Data Science",
         "credits": 2,
         "website": "https://study.iitm.ac.in/ds/course_pages/BSMS2001P.html",
+        "playlist": null
+    },
+    {
+        "name": "Modern Application Development II - Project",
+        "code": "BSCS2006P",
+        "level": "Diploma in Programming",
+        "credits": 2,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS2006P.html",
         "playlist": null
     },
     {
@@ -208,6 +208,14 @@
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBYMPKbh4tomTEoMiXTq9_3e"
     },
     {
+        "name": "Modern Application Development I - Project",
+        "code": "BSCS2003P",
+        "level": "Diploma in Programming",
+        "credits": 2,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS2003P.html",
+        "playlist": null
+    },
+    {
         "name": "Programming in Python",
         "code": "BSCS1002",
         "level": "Foundation",
@@ -224,60 +232,12 @@
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBY-wnDqzP1JQVaX3A-dfd1o"
     },
     {
-        "name": "Game Theory and Strategy",
-        "code": "BSMS4023",
-        "level": "Degree",
-        "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSMS4023.html",
-        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBbLzN1YMVO67miZP26eUYcR"
-    },
-    {
-        "name": "Modern Application Development I - Project",
-        "code": "BSCS2003P",
-        "level": "Diploma in Programming",
-        "credits": 2,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS2003P.html",
-        "playlist": null
-    },
-    {
         "name": "Modern Application Development I",
         "code": "BSCS2003",
         "level": "Diploma in Programming",
         "credits": 4,
         "website": "https://study.iitm.ac.in/ds/course_pages/BSCS2003.html",
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBZGVuyXs2l3KJtiHs0KMVE7"
-    },
-    {
-        "name": "Statistical Computing",
-        "code": "BSMA3014",
-        "level": "Degree",
-        "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSMA3014.html",
-        "playlist": null
-    },
-    {
-        "name": "Database Management Systems",
-        "code": "BSCS2001",
-        "level": "Diploma in Programming",
-        "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS2001.html",
-        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBYc4jkUk_yQAjYEVFzVzhdU"
-    },
-    {
-        "name": "English II",
-        "code": "BSHS1002",
-        "level": "Foundation",
-        "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSHS1002.html",
-        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBbWy3GL4oWKXGrwf6Ul8Cry"
-    },
-    {
-        "name": "Introduction to Natural Language Processing (i-NLP)",
-        "code": "BSDA5005",
-        "level": "Degree",
-        "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSDA5005.html",
-        "playlist": null
     },
     {
         "name": "Linear Statistical Models",
@@ -288,6 +248,14 @@
         "playlist": null
     },
     {
+        "name": "Game Theory and Strategy",
+        "code": "BSMS4023",
+        "level": "Degree",
+        "credits": 4,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSMS4023.html",
+        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBbLzN1YMVO67miZP26eUYcR"
+    },
+    {
         "name": "Statistics for Data Science I",
         "code": "BSMA1002",
         "level": "Foundation",
@@ -296,19 +264,35 @@
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBYrMs3zybOqr1DzMFCX49xG"
     },
     {
-        "name": "Data Visualization Design",
-        "code": "BSCS4001",
+        "name": "Statistical Computing",
+        "code": "BSMA3014",
         "level": "Degree",
         "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS4001.html",
-        "playlist": "https://youtube.com/playlist?list=PLZ2ps__7DhBZ12NClTmMLsnU0mF9ZUSG_"
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSMA3014.html",
+        "playlist": null
     },
     {
-        "name": "Advanced Algorithms",
-        "code": "BSCS4021",
+        "name": "English II",
+        "code": "BSHS1002",
+        "level": "Foundation",
+        "credits": 4,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSHS1002.html",
+        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBbWy3GL4oWKXGrwf6Ul8Cry"
+    },
+    {
+        "name": "Database Management Systems",
+        "code": "BSCS2001",
+        "level": "Diploma in Programming",
+        "credits": 4,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS2001.html",
+        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBYc4jkUk_yQAjYEVFzVzhdU"
+    },
+    {
+        "name": "Compiler Design",
+        "code": "BSCS4032",
         "level": "Degree",
         "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS4021.html",
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS4032.html",
         "playlist": null
     },
     {
@@ -320,19 +304,19 @@
         "playlist": "https://youtube.com/playlist?list=PLZ2ps__7DhBZo3cm7feryq5oLAHbSsLEL"
     },
     {
-        "name": "Compiler Design",
-        "code": "BSCS4032",
+        "name": "Deep Learning for Computer Vision",
+        "code": "BSDA5006",
         "level": "Degree",
         "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS4032.html",
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSDA5006.html",
         "playlist": null
     },
     {
-        "name": "Computer Networks",
-        "code": "BSCS4024",
+        "name": "Introduction to Natural Language Processing (i-NLP)",
+        "code": "BSDA5005",
         "level": "Degree",
         "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS4024.html",
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSDA5005.html",
         "playlist": null
     },
     {
@@ -344,28 +328,28 @@
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBaUpIodIKDFj_5JznWTxp1E"
     },
     {
-        "name": "Deep Learning for Computer Vision",
-        "code": "BSDA5006",
+        "name": "Machine Learning Techniques",
+        "code": "BSCS2007",
+        "level": "Diploma in Data Science",
+        "credits": 4,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS2007.html",
+        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBbA_e6_G3FI-BA1f7lCINUu"
+    },
+    {
+        "name": "Advanced Algorithms",
+        "code": "BSCS4021",
         "level": "Degree",
         "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSDA5006.html",
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS4021.html",
         "playlist": null
     },
     {
-        "name": null,
-        "code": null,
-        "level": null,
-        "credits": null,
-        "website": "https://study.iitm.ac.in/ds/course_pages/coming-soon.html",
-        "playlist": null
-    },
-    {
-        "name": "English I",
-        "code": "BSHS1001",
-        "level": "Foundation",
+        "name": "Data Visualization Design",
+        "code": "BSCS4001",
+        "level": "Degree",
         "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSHS1001.html",
-        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBbf28nnkgAuFwaWjGtjaNck"
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS4001.html",
+        "playlist": "https://youtube.com/playlist?list=PLZ2ps__7DhBZ12NClTmMLsnU0mF9ZUSG_"
     },
     {
         "name": "Mathematical Foundations of Generative AI",
@@ -376,12 +360,12 @@
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBa5xCmncgH7kPqLqMBq7xlu"
     },
     {
-        "name": "Machine Learning Techniques",
-        "code": "BSCS2007",
-        "level": "Diploma in Data Science",
+        "name": "Computer Networks",
+        "code": "BSCS4024",
+        "level": "Degree",
         "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS2007.html",
-        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBbA_e6_G3FI-BA1f7lCINUu"
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS4024.html",
+        "playlist": null
     },
     {
         "name": "Computer Systems Design",
@@ -390,6 +374,38 @@
         "credits": 4,
         "website": "https://study.iitm.ac.in/ds/course_pages/BSCS3031.html",
         "playlist": null
+    },
+    {
+        "name": "Big Data and Biological Networks",
+        "code": "BSBT4002",
+        "level": "Degree",
+        "credits": 4,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSBT4002.html",
+        "playlist": "https://youtube.com/playlist?list=PLZ2ps__7DhBapdXdBZInSjonWNAUL6Ycm"
+    },
+    {
+        "name": "Reinforcement Learning",
+        "code": "BSDA5007",
+        "level": "Degree",
+        "credits": 4,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSDA5007.html",
+        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBbDiVplM2I9q2XNso1Qfj62"
+    },
+    {
+        "name": "Programming, Data Structures and Algorithms using Python",
+        "code": "BSCS2002",
+        "level": "Diploma in Programming",
+        "credits": 4,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS2002.html",
+        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBaDccbZRgiU1sHX2gZrQ-XT"
+    },
+    {
+        "name": "English I",
+        "code": "BSHS1001",
+        "level": "Foundation",
+        "credits": 4,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSHS1001.html",
+        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBbf28nnkgAuFwaWjGtjaNck"
     },
     {
         "name": "App Dev LAB",
@@ -416,76 +432,12 @@
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBaLi6KQP_MHx_oGQHnqlTji"
     },
     {
-        "name": "Programming, Data Structures and Algorithms using Python",
-        "code": "BSCS2002",
-        "level": "Diploma in Programming",
-        "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS2002.html",
-        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBaDccbZRgiU1sHX2gZrQ-XT"
-    },
-    {
-        "name": "Reinforcement Learning",
-        "code": "BSDA5007",
-        "level": "Degree",
-        "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSDA5007.html",
-        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBbDiVplM2I9q2XNso1Qfj62"
-    },
-    {
-        "name": "Big Data and Biological Networks",
-        "code": "BSBT4002",
-        "level": "Degree",
-        "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSBT4002.html",
-        "playlist": "https://youtube.com/playlist?list=PLZ2ps__7DhBapdXdBZInSjonWNAUL6Ycm"
-    },
-    {
-        "name": "Mathematics for Data Science II",
-        "code": "BSMA1003",
-        "level": "Foundation",
-        "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSMA1003.html",
-        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBboGlwPVSsWP8loAJCLrKc8"
-    },
-    {
-        "name": "Machine Learning Practice - Project",
-        "code": "BSCS2008P",
-        "level": "Diploma in Data Science",
-        "credits": 2,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS2008P.html",
-        "playlist": null
-    },
-    {
-        "name": "Deep Learning Practice",
-        "code": "BSDA5013",
-        "level": "Degree",
-        "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSDA5013.html",
-        "playlist": null
-    },
-    {
         "name": "Speech Technology",
         "code": "BSEE4001",
         "level": "Degree",
         "credits": 4,
         "website": "https://study.iitm.ac.in/ds/course_pages/BSEE4001.html",
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBaI_g3_V-CFrgFIf-0Yksiv"
-    },
-    {
-        "name": "Financial Forensics",
-        "code": "BSMS4003",
-        "level": "Degree",
-        "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSMS4003.html",
-        "playlist": "https://youtube.com/playlist?list=PLZ2ps__7DhBbo9U5GQ4YTqvp2GX0EO3kq"
-    },
-    {
-        "name": "Tools in Data Science",
-        "code": "BSSE2002",
-        "level": "Diploma in Data Science",
-        "credits": 3,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSSE2002.html",
-        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBZEOxUBCkv61WHOu8m7ObpE"
     },
     {
         "name": "Programming in C",
@@ -496,12 +448,36 @@
         "playlist": null
     },
     {
-        "name": "Data Science and AI Lab",
-        "code": "BSDA4001",
+        "name": "Mathematics for Data Science II",
+        "code": "BSMA1003",
+        "level": "Foundation",
+        "credits": 4,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSMA1003.html",
+        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBboGlwPVSsWP8loAJCLrKc8"
+    },
+    {
+        "name": "Deep Learning Practice",
+        "code": "BSDA5013",
         "level": "Degree",
         "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSDA4001.html",
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSDA5013.html",
         "playlist": null
+    },
+    {
+        "name": "Machine Learning Practice - Project",
+        "code": "BSCS2008P",
+        "level": "Diploma in Data Science",
+        "credits": 2,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS2008P.html",
+        "playlist": null
+    },
+    {
+        "name": "Tools in Data Science",
+        "code": "BSSE2002",
+        "level": "Diploma in Data Science",
+        "credits": 3,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSSE2002.html",
+        "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBZEOxUBCkv61WHOu8m7ObpE"
     },
     {
         "name": "Machine Learning Operations (MLOps)",
@@ -512,12 +488,12 @@
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBaAR2w3oX5yMIQA8pUo5zt2"
     },
     {
-        "name": "Privacy & Security in Online Social Media",
-        "code": "BSCS4003",
+        "name": "Financial Forensics",
+        "code": "BSMS4003",
         "level": "Degree",
         "credits": 4,
-        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS4003.html",
-        "playlist": "https://youtube.com/playlist?list=PLZ2ps__7DhBaKvfv3VjSZlcVueXLymjXB"
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSMS4003.html",
+        "playlist": "https://youtube.com/playlist?list=PLZ2ps__7DhBbo9U5GQ4YTqvp2GX0EO3kq"
     },
     {
         "name": "Statistics for Data Science II",
@@ -526,5 +502,21 @@
         "credits": 4,
         "website": "https://study.iitm.ac.in/ds/course_pages/BSMA1004.html",
         "playlist": "https://www.youtube.com/playlist?list=PLZ2ps__7DhBbLZ6RdNTIXvFdaMpvqagt0"
+    },
+    {
+        "name": "Data Science and AI Lab",
+        "code": "BSDA4001",
+        "level": "Degree",
+        "credits": 4,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSDA4001.html",
+        "playlist": null
+    },
+    {
+        "name": "Privacy & Security in Online Social Media",
+        "code": "BSCS4003",
+        "level": "Degree",
+        "credits": 4,
+        "website": "https://study.iitm.ac.in/ds/course_pages/BSCS4003.html",
+        "playlist": "https://youtube.com/playlist?list=PLZ2ps__7DhBaKvfv3VjSZlcVueXLymjXB"
     }
 ]
