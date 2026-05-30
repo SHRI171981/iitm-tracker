@@ -3,6 +3,10 @@ from bs4 import BeautifulSoup
 import json
 from config import IITM_WEBSITE_URL, COURSE_LEVEL_MAPPING
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from scripts.extract_playlist_duration import calculate_total_hours
+import time
+import random
+import asyncio
 
 
 def scrape_course_page(url):
@@ -46,47 +50,70 @@ def get_all_course_urls(html_content):
 
 def scrape_course_detail_page(course_url):
     if 'coming-soon' in course_url:
-        return None  # Skip URLs that indicate the course is not yet available
-    html_content = scrape_course_page(course_url)
-    soup = BeautifulSoup(html_content, 'html.parser')
-    
-    name_tag = soup.find('p', class_='h2 font-weight-600 text-dark')
-    name = name_tag.text.strip() if name_tag else None
+        return None  
 
-    level_tag = soup.find(lambda tag: tag.name == 'p' and tag.text and 'Course Type:' in tag.text)
-    level = level_tag.text.replace("Course Type:", "").strip() if level_tag else None
-    level = COURSE_LEVEL_MAPPING.get(level.lower(), level) if level else None
-
-    code_tag = soup.find(lambda tag: tag.name == 'p' and tag.text and 'Course ID:' in tag.text)
-    code = code_tag.text.replace("Course ID:", "").strip() if code_tag else None
-
-    credits_val = None
-    credits_tag = soup.find(lambda tag: tag.name == 'p' and tag.text and 'Course Credits:' in tag.text)
-    if credits_tag:
-        raw_credits = credits_tag.text.replace("Course Credits:", "").strip()
+    max_retries = 3
+    for attempt in range(max_retries):
         try:
-            credits_val = int(raw_credits)
-        except ValueError:
+            html_content = scrape_course_page(course_url)
+            soup = BeautifulSoup(html_content, 'html.parser')
+            
+            name_tag = soup.find('p', class_='h2 font-weight-600 text-dark')
+            name = name_tag.text.strip() if name_tag else None
+
+            level_tag = soup.find(lambda tag: tag.name == 'p' and tag.text and 'Course Type:' in tag.text)
+            level = level_tag.text.replace("Course Type:", "").strip() if level_tag else None
+            
+            # Note: COURSE_LEVEL_MAPPING must be defined in the broader scope
+            level = COURSE_LEVEL_MAPPING.get(level.lower(), level) if level else None
+
+            code_tag = soup.find(lambda tag: tag.name == 'p' and tag.text and 'Course ID:' in tag.text)
+            code = code_tag.text.replace("Course ID:", "").strip() if code_tag else None
+
             credits_val = None
+            credits_tag = soup.find(lambda tag: tag.name == 'p' and tag.text and 'Course Credits:' in tag.text)
+            if credits_tag:
+                raw_credits = credits_tag.text.replace("Course Credits:", "").strip()
+                try:
+                    credits_val = int(raw_credits)
+                except ValueError:
+                    credits_val = None
 
-    playlist = None
-    playlist_tag = soup.find(lambda tag: tag.name == 'a' and tag.text and 'VIEW COURSE VIDEOS' in tag.text.upper())
-    if playlist_tag and playlist_tag.has_attr('href'):
-        playlist = playlist_tag['href']
+            playlist = None
+            playlist_tag = soup.find(lambda tag: tag.name == 'a' and tag.text and 'VIEW COURSE VIDEOS' in tag.text.upper())
+            if playlist_tag and playlist_tag.has_attr('href'):
+                playlist = playlist_tag['href']
 
-    return {
-        "name": name,
-        "code": code,
-        "level": level,
-        "credits": credits_val,
-        "website": course_url,
-        "playlist": playlist
-    }
+            num_hours = None
+            if playlist:
+                # Executes the asynchronous calculate_total_hours function safely inside a synchronous thread
+                num_hours = asyncio.run(calculate_total_hours(playlist))
+
+            return {
+                "name": name,
+                "code": code,
+                "level": level,
+                "credits": credits_val,
+                "website": course_url,
+                "playlist": playlist,
+                "num_hours": num_hours
+            }
+
+        except Exception as e:
+            error_message = str(e).lower()
+            if "429" in error_message or "403" in error_message or "too many requests" in error_message:
+                if attempt < max_retries - 1:
+                    sleep_duration = (2 ** attempt) + random.uniform(0.1, 1.0)
+                    time.sleep(sleep_duration)
+                    continue
+            raise e
+            
+    return None
 
 
 def run_scraping_parallel(course_urls, max_workers=5):
-    
     course_details = []
+    
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_url = {executor.submit(scrape_course_detail_page, url): url for url in course_urls}
         
@@ -100,6 +127,7 @@ def run_scraping_parallel(course_urls, max_workers=5):
                 print(f"Error processing {url}: {exc}")
     
     return course_details
+
 
 if __name__ == "__main__":
     # text = scrape_course_detail_page(course_url="https://study.iitm.ac.in/ds/course_pages/BSCS3003.html")
