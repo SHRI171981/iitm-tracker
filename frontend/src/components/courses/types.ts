@@ -2,7 +2,7 @@ export interface Course {
   id: number | string;
   name: string;
   code: string;
-  level: string;
+  level: string | "Foundation" | "Diploma in Data Science" | "Diploma in Programming" | "BSc Degree" | "BS Degree" | "PG Diploma" | "M Tech";
   num_weeks: number;
   num_hours: number;
   website: string;
