@@ -28,6 +28,10 @@ class Course(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(100), nullable=False)  
     code = Column(String(20), unique=True, nullable=False)
+    level = Column(String(20), nullable=True)
+    num_hours = Column(Integer, nullable=True)
+    website = Column(String(255), nullable=True)
+    playlist = Column(String(255), nullable=True)
     
     weeks = relationship("Week", back_populates="course")
     dependencies_from = relationship("Dependency", foreign_keys="[Dependency.from_course_id]", back_populates="from_course")
