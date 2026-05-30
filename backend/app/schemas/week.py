@@ -12,7 +12,7 @@ class WeekBase(BaseModel):
     name: str = Field(
         ...,
         description="Name of the week",
-        max_length=100
+        max_length=255
     )
     num: int = Field(
         ...,
@@ -31,7 +31,7 @@ class WeekCreate(BaseModel):
     name: Optional[str] = Field(
         None,
         description="Name of the week",
-        max_length=100
+        max_length=255
     )
     num: Optional[int] = Field(
         None,

@@ -12,12 +12,12 @@ class CourseBase(BaseModel):
     name: str = Field(
         ...,
         description="Name of the course",
-        max_length=100
+        max_length=255
     )
     code: str = Field(
         ...,
         description="Unique code for the course",
-        max_length=20
+        max_length=255
     )
     credits: Optional[int] = Field(
         None,
@@ -37,7 +37,7 @@ class CourseBase(BaseModel):
     level: Optional[str] = Field(
         None,
         description=f"Difficulty level of the course. Must be one of: {{LEVEL_LIST}}",
-        max_length=20,
+        max_length=255,
     )
     website: Optional[str] = Field(
         None,
@@ -63,12 +63,12 @@ class CourseCreate(BaseModel):
     name: Optional[str] = Field(
         None,
         description="Name of the course",
-        max_length=100
+        max_length=255
     )
     code: Optional[str] = Field(
         None,
         description="Unique code for the course",
-        max_length=20
+        max_length=255
     )
     credits: Optional[int] = Field(
         None,
@@ -78,7 +78,7 @@ class CourseCreate(BaseModel):
     level: Optional[str] = Field(
         None,
         description=f"Difficulty level of the course. Must be one of: {{LEVEL_LIST}}",
-        max_length=20
+        max_length=255
     )
     website: Optional[str] = Field(
         None,
