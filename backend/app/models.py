@@ -17,8 +17,8 @@ class User(Base):
 class Student(Base):
     __tablename__ = 'student'
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    name = Column(String(100), nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
+    name = Column(String(255), nullable=False)
+    email = Column(String(255), unique=True, nullable=False)
     user_id = Column(UUID(as_uuid=True), ForeignKey('user.id'), nullable=False)
     user = relationship("User", back_populates="student")
     student_lectures = relationship("StudentLecture", back_populates="student")
@@ -26,9 +26,9 @@ class Student(Base):
 class Course(Base):
     __tablename__ = 'course'
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    name = Column(String(100), nullable=False)  
-    code = Column(String(20), unique=True, nullable=False)
-    level = Column(String(20), nullable=True)
+    name = Column(String(255), nullable=False)  
+    code = Column(String(255), unique=True, nullable=False)
+    level = Column(String(255), nullable=True)
     credits = Column(Integer, nullable=True)
     num_hours = Column(Integer, nullable=True)
     website = Column(String(255), nullable=True)
@@ -42,7 +42,7 @@ class Course(Base):
 class Week(Base):
     __tablename__ = 'week'
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    name = Column(String(100), nullable=False)
+    name = Column(String(255), nullable=False)
     num = Column(Integer, nullable=False)
     course_id = Column(UUID(as_uuid=True), ForeignKey('course.id'), nullable=False)
     course = relationship("Course", back_populates="weeks")
@@ -51,7 +51,7 @@ class Week(Base):
 class Lecture(Base):
     __tablename__ = 'lecture'
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    name = Column(String(100), nullable=False)
+    name = Column(String(255), nullable=False)
     num = Column(Integer, nullable=False)
     week_id = Column(UUID(as_uuid=True), ForeignKey('week.id'), nullable=False)
     week = relationship("Week", back_populates="lectures")
