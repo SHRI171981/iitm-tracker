@@ -4,6 +4,7 @@ import ProtectedRoute from '@/components/protected/ProtectedRoute'
 import HomeView from '@/views/HomeView';
 import AnalyticsView from '@/views/AnalyticsView';
 import CourseView from '@/views/CourseView';
+import CourseDetailsView from '@/views/CourseDetailsView';
 import ProgressView from '@/views/ProgressView';
 import StopwatchView from '@/views/StopwatchView';
 import AdminView from '@/views/AdminView';
@@ -20,7 +21,13 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <HomeView /> },
           { path: 'analytics', element: <AnalyticsView /> },
-          { path: 'courses', element: <CourseView /> },
+          { 
+            path: 'courses', 
+            children: [
+              { index: true, element: <CourseView /> },
+              { path: ':id', element: <CourseDetailsView /> }
+            ]
+          },
           { path: 'progress', element: <ProgressView /> },
           { path: 'stopwatch', element: <StopwatchView /> },
           { path: 'admin', element: <AdminView /> },
