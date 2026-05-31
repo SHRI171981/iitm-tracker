@@ -8,6 +8,7 @@ from helpers.security import get_password_hash, verify_password
 from app import models
 from app.database import get_db
 from app.schemas import course
+from scripts.extract_playlist_duration import calculate_total_hours
 
 router = APIRouter(
     prefix="/api/course",
@@ -39,7 +40,9 @@ async def create_course(course_data: course.CourseCreate, db: Session = Depends(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Course code or name already exists")
     
     try:
-        new_course = models.Course(name=course_data.name, code=course_data.code)
+        new_course = models.Course(**course_data.model_dump())
+        num_hours = await calculate_total_hours(course_data.playlist) if course_data.playlist else None
+        new_course.num_hours = num_hours
         db.add(new_course)
         db.commit()
         db.refresh(new_course)
