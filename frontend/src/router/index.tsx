@@ -5,6 +5,7 @@ import HomeView from '@/views/HomeView';
 import AnalyticsView from '@/views/AnalyticsView';
 import CourseView from '@/views/CourseView';
 import CourseDetailsView from '@/views/CourseDetailsView';
+import CourseDetailsAdminView from '@/views/CourseDetailsAdminView';
 import ProgressView from '@/views/ProgressView';
 import StopwatchView from '@/views/StopwatchView';
 import AdminView from '@/views/AdminView';
@@ -25,7 +26,7 @@ const router = createBrowserRouter([
             path: 'courses', 
             children: [
               { index: true, element: <CourseView /> },
-              { path: ':id', element: <CourseDetailsView /> }
+              { path: ':id', element: <CourseDetailsAdminView /> }
             ]
           },
           { path: 'progress', element: <ProgressView /> },
