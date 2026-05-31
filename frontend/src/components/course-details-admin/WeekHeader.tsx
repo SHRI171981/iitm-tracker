@@ -1,6 +1,7 @@
 // @/components/course-details-admin/WeekHeader.tsx
 import React, { useState } from 'react';
 import { Edit2, Trash2, ChevronDown, ChevronRight, Check, X } from 'lucide-react';
+import { useCourseStore } from '@/stores/useCoursesStore';
 import type { Week } from '@/components/course-details-admin/types';
 
 interface WeekHeaderProps {
@@ -10,19 +11,43 @@ interface WeekHeaderProps {
 }
 
 const WeekHeader: React.FC<WeekHeaderProps> = ({ week, isExpanded, onToggleExpand }) => {
+  const updateWeek = useCourseStore((state) => state.updateWeek);
+  const deleteWeek = useCourseStore((state) => state.deleteWeek);
+
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(week.name);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleSave = () => {
-    // Placeholder: Does nothing for now
-    setIsEditing(false);
+  const handleSave = async () => {
+    if (editName.trim() && editName !== week.name) {
+      setIsProcessing(true);
+      try {
+        await updateWeek(week.id, {
+          name: editName.trim(),
+          num: week.num,
+          course_id: week.course_id
+        });
+        setIsEditing(false);
+      } catch (error) {
+        console.error("Failed to update week", error);
+      } finally {
+        setIsProcessing(false);
+      }
+    } else {
+      setIsEditing(false);
+    }
   };
 
-  const handleDelete = (e: React.MouseEvent) => {
+  const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (window.confirm("Are you sure you want to delete this week and all its lectures?")) {
-      // Placeholder: Does nothing for now
-      console.log("Delete week", week.id);
+      setIsProcessing(true);
+      try {
+        await deleteWeek(week.course_id, week.id);
+      } catch (error) {
+        console.error("Failed to delete week", error);
+        setIsProcessing(false);
+      }
     }
   };
 
@@ -34,8 +59,8 @@ const WeekHeader: React.FC<WeekHeaderProps> = ({ week, isExpanded, onToggleExpan
 
   return (
     <div 
-      onClick={() => !isEditing && onToggleExpand()}
-      style={{ backgroundColor: '#f8fafc', padding: '16px 24px', borderBottom: isExpanded ? '1px solid #e2e8f0' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: isEditing ? 'default' : 'pointer', transition: 'background-color 0.2s' }}
+      onClick={() => !isEditing && !isProcessing && onToggleExpand()}
+      style={{ backgroundColor: '#f8fafc', padding: '16px 24px', borderBottom: isExpanded ? '1px solid #e2e8f0' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: (isEditing || isProcessing) ? 'default' : 'pointer', transition: 'background-color 0.2s', opacity: isProcessing ? 0.6 : 1 }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
         {!isEditing && (
@@ -53,6 +78,7 @@ const WeekHeader: React.FC<WeekHeaderProps> = ({ week, isExpanded, onToggleExpan
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+              disabled={isProcessing}
               style={{ flex: 1, padding: '6px 12px', border: '1px solid #cbd5e0', borderRadius: '6px', outline: 'none', fontSize: '1.1rem' }}
             />
             <button onClick={handleSave} style={{ background: 'none', border: 'none', color: '#38a169', cursor: 'pointer', padding: '4px' }}><Check size={20} /></button>

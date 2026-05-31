@@ -1,23 +1,37 @@
 // @/components/course-details-admin/CourseContentList.tsx
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
+import { useCourseStore } from '@/stores/useCoursesStore';
 import WeekContainer from '@/components/course-details-admin/WeekContainer';
-import type { Week, Course } from '@/components/course-details-admin/types';
+import type { Week } from '@/components/course-details-admin/types';
 
 interface CourseContentListProps {
-  course: Course;
+  courseId: string;
   weeks: Week[];
 }
 
-const CourseContentList: React.FC<CourseContentListProps> = ({ course, weeks }) => {
+const CourseContentList: React.FC<CourseContentListProps> = ({ courseId, weeks }) => {
+  const createWeek = useCourseStore((state) => state.createWeek);
+  
   const [newWeekName, setNewWeekName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleAddWeekSubmit = (e: React.FormEvent) => {
+  const handleAddWeekSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newWeekName.trim()) {
-      // Placeholder: Does nothing for now
-      console.log("Add week:", newWeekName.trim());
-      setNewWeekName('');
+      setIsSubmitting(true);
+      try {
+        await createWeek({
+          name: newWeekName.trim(),
+          num: weeks.length + 1,
+          course_id: courseId
+        });
+        setNewWeekName('');
+      } catch (error) {
+        console.error("Failed to add week", error);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -38,11 +52,12 @@ const CourseContentList: React.FC<CourseContentListProps> = ({ course, weeks }) 
             type="text"
             placeholder="Enter week title..."
             required
+            disabled={isSubmitting}
             value={newWeekName}
             onChange={(e) => setNewWeekName(e.target.value)}
             style={{ flex: 1, padding: '12px 16px', border: '1px solid #cbd5e0', borderRadius: '8px', outline: 'none', fontSize: '1rem' }}
           />
-          <button type="submit" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#4f46e5', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '1rem' }}>
+          <button type="submit" disabled={isSubmitting} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#4f46e5', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: isSubmitting ? 'not-allowed' : 'pointer', fontSize: '1rem', opacity: isSubmitting ? 0.7 : 1 }}>
             <Plus size={20} />
             Add Week
           </button>

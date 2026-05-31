@@ -8,7 +8,6 @@ import CourseContentList from '@/components/course-details-admin/CourseContentLi
 const EMPTY_ARRAY: any[] = [];
 
 const CourseDetailsAdminView: React.FC = () => {
-  // Extract course ID directly from the URL parameters
   const { id } = useParams<{ id: string }>();
   const courseId = id || '';
 
@@ -17,8 +16,9 @@ const CourseDetailsAdminView: React.FC = () => {
   
   const course = useCourseStore((state) => state.courseDetails[courseId]);
   
-  // Utilize the stable EMPTY_ARRAY reference to prevent Zustand infinite loops
-  const weeks = useCourseStore((state) => state.weeksByCourse[courseId] ?? EMPTY_ARRAY);
+  // Extract data first, apply fallback outside the selector to prevent infinite loops
+  const weeksData = useCourseStore((state) => state.weeksByCourse[courseId]);
+  const weeks = weeksData || EMPTY_ARRAY;
   
   const isFetchingCourse = useCourseStore((state) => state.fetchingCourse[courseId]);
   const isFetchingWeeks = useCourseStore((state) => state.fetchingWeeks[courseId]);

@@ -13,18 +13,32 @@ interface WeekContainerProps {
 const EMPTY_ARRAY: any[] = [];
 
 const WeekContainer: React.FC<WeekContainerProps> = ({ week }) => {
-  // Use the nullish coalescing operator with a stable reference
-  const lectures = useCourseStore((state) => state.lecturesByWeek[week.id] ?? EMPTY_ARRAY);
+  // Utilizing EMPTY_ARRAY reference outside of the selector to prevent infinite re-renders
+  const lecturesData = useCourseStore((state) => state.lecturesByWeek[week.id]);
+  const lectures = lecturesData || EMPTY_ARRAY;
+  
+  const createLecture = useCourseStore((state) => state.createLecture);
   
   const [isExpanded, setIsExpanded] = useState(false);
   const [newLectureName, setNewLectureName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleAddLectureSubmit = (e: React.FormEvent) => {
+  const handleAddLectureSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newLectureName.trim()) {
-      // Placeholder: Does nothing for now
-      console.log("Add lecture:", newLectureName.trim());
-      setNewLectureName('');
+      setIsSubmitting(true);
+      try {
+        await createLecture({
+          name: newLectureName.trim(),
+          num: lectures.length + 1,
+          week_id: week.id
+        });
+        setNewLectureName('');
+      } catch (error) {
+        console.error("Failed to add lecture", error);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -63,11 +77,12 @@ const WeekContainer: React.FC<WeekContainerProps> = ({ week }) => {
                 type="text"
                 placeholder="Add new lecture title..."
                 required
+                disabled={isSubmitting}
                 value={newLectureName}
                 onChange={(e) => setNewLectureName(e.target.value)}
                 style={{ flex: 1, padding: '8px 12px', border: '1px solid #cbd5e0', borderRadius: '6px', outline: 'none', backgroundColor: '#fff' }}
               />
-              <button type="submit" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', backgroundColor: '#4299e1', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}>
+              <button type="submit" disabled={isSubmitting} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', backgroundColor: '#4299e1', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 600, cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
                 <Plus size={16} /> Add
               </button>
             </div>

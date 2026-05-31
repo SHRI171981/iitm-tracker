@@ -1,6 +1,7 @@
 // @/components/course-details-admin/LectureRow.tsx
 import React, { useState } from 'react';
 import { Edit2, Trash2, Check, X } from 'lucide-react';
+import { useCourseStore } from '@/stores/useCoursesStore';
 import type { Lecture } from '@/components/course-details-admin/types';
 
 interface LectureRowProps {
@@ -9,23 +10,47 @@ interface LectureRowProps {
 }
 
 const LectureRow: React.FC<LectureRowProps> = ({ lecture, weekNum }) => {
+  const updateLecture = useCourseStore((state) => state.updateLecture);
+  const deleteLecture = useCourseStore((state) => state.deleteLecture);
+
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(lecture.name);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleSave = () => {
-    // Placeholder: Does nothing for now
-    setIsEditing(false);
+  const handleSave = async () => {
+    if (editName.trim() && editName !== lecture.name) {
+      setIsProcessing(true);
+      try {
+        await updateLecture(lecture.id, {
+          name: editName.trim(),
+          num: lecture.num,
+          week_id: lecture.week_id
+        });
+        setIsEditing(false);
+      } catch (error) {
+        console.error("Failed to update lecture", error);
+      } finally {
+        setIsProcessing(false);
+      }
+    } else {
+      setIsEditing(false);
+    }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this lecture?")) {
-      // Placeholder: Does nothing for now
-      console.log("Delete lecture", lecture.id);
+      setIsProcessing(true);
+      try {
+        await deleteLecture(lecture.week_id, lecture.id);
+      } catch (error) {
+        console.error("Failed to delete lecture", error);
+        setIsProcessing(false);
+      }
     }
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', opacity: isProcessing ? 0.6 : 1, pointerEvents: isProcessing ? 'none' : 'auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
         <span style={{ fontWeight: 600, color: '#718096', minWidth: '30px' }}>
           {weekNum}.{lecture.num}
@@ -38,6 +63,7 @@ const LectureRow: React.FC<LectureRowProps> = ({ lecture, weekNum }) => {
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+              disabled={isProcessing}
               style={{ flex: 1, padding: '4px 10px', border: '1px solid #cbd5e0', borderRadius: '6px', outline: 'none' }}
             />
             <button onClick={handleSave} style={{ background: 'none', border: 'none', color: '#38a169', cursor: 'pointer', padding: '4px' }}><Check size={18} /></button>

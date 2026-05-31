@@ -1,3 +1,4 @@
+// src/stores/useCoursesStore.ts
 import { create } from 'zustand';
 import apiClient from '@/api/axios';
 import type { Course, Week, Lecture } from '@/components/courses/types';
@@ -14,6 +15,8 @@ interface CourseStore {
   fetchingWeeks: Record<string, boolean>;
   fetchingLectures: Record<string, boolean>;
   error: string | null;
+  
+  // Existing Actions
   fetchCourses: () => Promise<void>;
   fetchCourseDetails: (courseId: string) => Promise<void>;
   fetchWeeks: (courseId: string) => Promise<void>;
@@ -23,6 +26,16 @@ interface CourseStore {
   createCourse: (payload: any) => Promise<void>;
   updateCourse: (courseId: string, payload: any) => Promise<void>;
   deleteCourse: (courseId: string) => Promise<void>;
+  
+  // Week CRUD Actions
+  createWeek: (payload: { name: string; num: number; course_id: string }) => Promise<void>;
+  updateWeek: (weekId: string, payload: { name: string; num: number; course_id: string }) => Promise<void>;
+  deleteWeek: (courseId: string, weekId: string) => Promise<void>;
+  
+  // Lecture CRUD Actions
+  createLecture: (payload: { name: string; num: number; week_id: string }) => Promise<void>;
+  updateLecture: (lectureId: string, payload: { name: string; num: number; week_id: string }) => Promise<void>;
+  deleteLecture: (weekId: string, lectureId: string) => Promise<void>;
 }
 
 export const useCourseStore = create<CourseStore>((set, get) => ({
@@ -138,7 +151,15 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
     }
   },
 
-
+  createCourse: async (payload) => {
+    const response = await apiClient.post('/course/create', payload);
+    if (response.status === 200 || response.status === 201) {
+      const newCourse = response.data;
+      set((state) => ({
+        courses: [...state.courses, newCourse].sort((a: Course, b: Course) => a.name.localeCompare(b.name))
+      }));
+    }
+  },
 
   updateCourse: async (courseId, payload) => {
     const response = await apiClient.patch(`/course/update/${courseId}`, payload);
@@ -166,6 +187,90 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
           courseDetails: newCourseDetails
         };
       });
+    }
+  },
+
+  // ---------------------------------------------------------
+  // WEEK CRUD OPERATIONS
+  // ---------------------------------------------------------
+  
+  createWeek: async (payload) => {
+    const response = await apiClient.post('/week/create', payload);
+    if (response.status === 200 || response.status === 201) {
+      set((state) => ({
+        weeksByCourse: {
+          ...state.weeksByCourse,
+          [payload.course_id]: [...(state.weeksByCourse[payload.course_id] || []), response.data]
+        }
+      }));
+    }
+  },
+
+  updateWeek: async (weekId, payload) => {
+    const response = await apiClient.patch(`/week/update/${weekId}`, payload);
+    if (response.status === 200) {
+      set((state) => ({
+        weeksByCourse: {
+          ...state.weeksByCourse,
+          [payload.course_id]: (state.weeksByCourse[payload.course_id] || []).map((w) => 
+            w.id === weekId ? response.data : w
+          )
+        }
+      }));
+    }
+  },
+
+  deleteWeek: async (courseId, weekId) => {
+    const response = await apiClient.delete(`/week/delete/${weekId}`);
+    if (response.status === 200 || response.status === 204) {
+      set((state) => ({
+        weeksByCourse: {
+          ...state.weeksByCourse,
+          [courseId]: (state.weeksByCourse[courseId] || []).filter((w) => w.id !== weekId)
+        }
+      }));
+    }
+  },
+
+  // ---------------------------------------------------------
+  // LECTURE CRUD OPERATIONS
+  // ---------------------------------------------------------
+
+  createLecture: async (payload) => {
+    const response = await apiClient.post('/lecture/create', payload);
+    if (response.status === 200 || response.status === 201) {
+      set((state) => ({
+        lecturesByWeek: {
+          ...state.lecturesByWeek,
+          [payload.week_id]: [...(state.lecturesByWeek[payload.week_id] || []), response.data]
+        }
+      }));
+    }
+  },
+
+  updateLecture: async (lectureId, payload) => {
+    const response = await apiClient.patch(`/lecture/update/${lectureId}`, payload);
+    if (response.status === 200) {
+      set((state) => ({
+        lecturesByWeek: {
+          ...state.lecturesByWeek,
+          [payload.week_id]: (state.lecturesByWeek[payload.week_id] || []).map((l) => 
+            l.id === lectureId ? response.data : l
+          )
+        }
+      }));
+    }
+  },
+
+  deleteLecture: async (weekId, lectureId) => {
+    const response = await apiClient.delete(`/lecture/delete/${lectureId}`);
+    if (response.status === 200 || response.status === 204) {
+      set((state) => ({
+        lecturesByWeek: {
+          ...state.lecturesByWeek,
+          [weekId]: (state.lecturesByWeek[weekId] || []).filter((l) => l.id !== lectureId)
+        }
+      }));
     }
   }
 }));
