@@ -33,7 +33,7 @@ async def get_course(course_id: UUID, db: Session = Depends(get_db)):
     return _course
 
 
-@router.get("/some", response_model=List[course.CourseBase])
+@router.post("/some", response_model=List[course.CourseBase])
 async def get_courses_by_ids(course_ids: List[UUID], db: Session = Depends(get_db)):
     courses = db.query(models.Course).filter(models.Course.id.in_(course_ids)).all()
     for course in courses:
