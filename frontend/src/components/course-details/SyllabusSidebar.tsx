@@ -8,7 +8,7 @@ interface SyllabusSidebarProps {
 
 const SyllabusSidebar: React.FC<SyllabusSidebarProps> = ({ weeks }) => {
   return (
-    <div className="w-1/3 border-r border-slate-200 bg-slate-50/50 flex flex-col h-full">
+    <div className="w-7/12 border-r border-slate-200 bg-slate-50/50 flex flex-col h-full">
       <div className="p-4 border-b border-slate-200 bg-white shrink-0">
         <h2 className="text-lg font-extrabold text-slate-800 tracking-tight uppercase">Syllabus</h2>
       </div>

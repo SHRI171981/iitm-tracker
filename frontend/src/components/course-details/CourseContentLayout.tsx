@@ -32,7 +32,7 @@ const CourseContentLayout: React.FC<CourseContentLayoutProps> = ({ course, weeks
     <div className="flex-1 flex w-full bg-white border-t border-slate-200 overflow-hidden">
       <SyllabusSidebar weeks={weeks} />
 
-      <div className="w-2/3 p-8 flex flex-col bg-white overflow-y-auto">
+      <div className="w-5/12 p-8 flex flex-col bg-white overflow-y-auto">
         <div className="max-w-3xl w-full mx-auto">
           <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl shadow-sm mb-8">
             <div className="flex items-end justify-between mb-3">
