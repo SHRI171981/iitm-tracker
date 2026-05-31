@@ -24,19 +24,18 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({ course }) => {
     }}>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-        <h1 style={{ margin: 0, fontSize: '2rem', color: '#1a202c', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '-0.02em' }}>
-            {course.name}
+        <h1 style={{ margin: 0, fontSize: '2rem', color: '#1a202c', fontWeight: 750, textTransform: 'uppercase', letterSpacing: '-0.02em' }}>
+          {course.name}
         </h1>
-        
         <div style={{ display: 'flex', flexDirection: 'row', gap: '8px' }}>
           <CourseBadge bgColor="#e0e7ff" textColor="#4338ca">
             {course.code }
           </CourseBadge>
           <CourseBadge bgColor="#e0e7ff" textColor="#4338ca">
-            {course.level || 'No Level Info'}
+            {course.level || 'No Level'}
           </CourseBadge>
           <CourseBadge bgColor="#e0e7ff" textColor="#4338ca">
-            {course.credits ? `${course.credits} Credits` : 'No Credits Info'}
+            {course.credits ? `${course.credits} Credits` : 'No Credits'}
           </CourseBadge>
         </div>
       </div>
