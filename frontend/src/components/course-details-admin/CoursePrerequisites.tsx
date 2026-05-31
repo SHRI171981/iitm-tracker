@@ -20,6 +20,8 @@ const CoursePrerequisites: React.FC<{ courseId: string }> = ({ courseId }) => {
 
   const [isAdding, setIsAdding] = useState(false);
   const [selectedPrereqId, setSelectedPrereqId] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Initialize data
@@ -42,6 +44,10 @@ const CoursePrerequisites: React.FC<{ courseId: string }> = ({ courseId }) => {
   }, [dependencies, courseDetails, fetchSomeCourses]);
 
   const handleDelete = async (dependencyId: string) => {
+    if (!window.confirm("Are you sure you want to remove this prerequisite?")) {
+      return;
+    }
+
     setIsProcessing(true);
     try {
       await deleteDependency(courseId, dependencyId);
@@ -60,8 +66,7 @@ const CoursePrerequisites: React.FC<{ courseId: string }> = ({ courseId }) => {
         from_course_id: selectedPrereqId,
         to_course_id: courseId
       });
-      setIsAdding(false);
-      setSelectedPrereqId('');
+      closeAddMenu();
     } catch (error) {
       console.error("Failed to add prerequisite");
     } finally {
@@ -69,11 +74,17 @@ const CoursePrerequisites: React.FC<{ courseId: string }> = ({ courseId }) => {
     }
   };
 
-  // Filter out the current course and any already added prerequisites from the dropdown
-  const availableCourses = allCourses.filter(c => 
-    String(c.id) !== String(courseId) && 
-    !dependencies.some(d => String(d.from_course_id) === String(c.id))
-  );
+  const closeAddMenu = () => {
+    setIsAdding(false);
+    setSelectedPrereqId('');
+    setSearchTerm('');
+    setIsDropdownOpen(false);
+  };
+
+  // Filter out the current course and any already added prerequisites, then apply search term
+  const filteredAvailableCourses = allCourses
+    .filter(c => String(c.id) !== String(courseId) && !dependencies.some(d => String(d.from_course_id) === String(c.id)))
+    .filter(c => `${c.code} ${c.name}`.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <div>
@@ -95,6 +106,8 @@ const CoursePrerequisites: React.FC<{ courseId: string }> = ({ courseId }) => {
         ) : (
           dependencies.map(dep => {
             const prereqCourse = courseDetails[dep.from_course_id];
+            const isLoading = !prereqCourse;
+
             return (
               <CourseBadge
                 key={dep.id}
@@ -102,7 +115,7 @@ const CoursePrerequisites: React.FC<{ courseId: string }> = ({ courseId }) => {
                 borderColor="#fed7aa"
                 textColor="#ea580c"
                 onDelete={() => handleDelete(dep.id)}
-                disabled={isProcessing}
+                disabled={isProcessing || isLoading}
               >
                 <span>
                   <strong style={{ fontWeight: 800 }}>{prereqCourse?.code || 'Loading...'}</strong> 
@@ -114,20 +127,76 @@ const CoursePrerequisites: React.FC<{ courseId: string }> = ({ courseId }) => {
         )}
         
         {isAdding ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#f8fafc', padding: '4px', borderRadius: '16px', border: '1px solid #cbd5e0' }}>
-            <select 
-              value={selectedPrereqId} 
-              onChange={(e) => setSelectedPrereqId(e.target.value)}
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#f8fafc', padding: '4px', borderRadius: '16px', border: '1px solid #cbd5e0' }}>
+            
+            {/* Searchable Input */}
+            <input 
+              type="text"
+              placeholder="Search course..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setIsDropdownOpen(true);
+                setSelectedPrereqId(''); // Reset internal selection when typing changes
+              }}
+              onFocus={() => setIsDropdownOpen(true)}
               disabled={isProcessing}
-              style={{ padding: '2px 8px', border: 'none', background: 'transparent', outline: 'none', fontSize: '0.85rem', color: '#475569', maxWidth: '200px' }}
+              style={{ padding: '2px 8px', border: 'none', background: 'transparent', outline: 'none', fontSize: '0.85rem', color: '#475569', width: '220px' }}
+            />
+            
+            {/* Click-away overlay to close the dropdown when clicking outside */}
+            {isDropdownOpen && (
+              <div 
+                style={{ position: 'fixed', inset: 0, zIndex: 40 }} 
+                onClick={() => setIsDropdownOpen(false)} 
+              />
+            )}
+
+            {/* Custom Dropdown List */}
+            {isDropdownOpen && filteredAvailableCourses.length > 0 && (
+              <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '6px', width: '280px', maxHeight: '220px', overflowY: 'auto', backgroundColor: '#fff', border: '1px solid #cbd5e0', borderRadius: '8px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', zIndex: 50 }}>
+                {filteredAvailableCourses.map(c => (
+                  <div 
+                    key={c.id} 
+                    onClick={() => {
+                      setSelectedPrereqId(String(c.id));
+                      setSearchTerm(`${c.code} - ${c.name}`);
+                      setIsDropdownOpen(false);
+                    }}
+                    style={{ padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid #f1f5f9', fontSize: '0.85rem', color: '#1a202c', transition: 'background-color 0.1s' }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#fff'}
+                  >
+                    <strong style={{ color: '#4338ca' }}>{c.code}</strong> - {c.name}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Empty State Dropdown */}
+            {isDropdownOpen && searchTerm && filteredAvailableCourses.length === 0 && (
+              <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '6px', width: '280px', backgroundColor: '#fff', border: '1px solid #cbd5e0', borderRadius: '8px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', zIndex: 50, padding: '10px 12px', fontSize: '0.85rem', color: '#a0aec0', fontStyle: 'italic' }}>
+                No matching courses found.
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <button 
+              onClick={handleAddSubmit} 
+              disabled={isProcessing || !selectedPrereqId} 
+              style={{ background: 'none', border: 'none', color: selectedPrereqId && !isProcessing ? '#38a169' : '#a0aec0', cursor: selectedPrereqId && !isProcessing ? 'pointer' : 'not-allowed', padding: '2px', display: 'flex', alignItems: 'center', transition: 'color 0.2s' }}
             >
-              <option value="">Select course...</option>
-              {availableCourses.map(c => (
-                <option key={c.id} value={c.id}>{c.code} - {c.name}</option>
-              ))}
-            </select>
-            <button onClick={handleAddSubmit} disabled={isProcessing || !selectedPrereqId} style={{ background: 'none', border: 'none', color: '#38a169', cursor: 'pointer', padding: '2px' }}><Check size={16} /></button>
-            <button onClick={() => { setIsAdding(false); setSelectedPrereqId(''); }} disabled={isProcessing} style={{ background: 'none', border: 'none', color: '#a0aec0', cursor: 'pointer', padding: '2px' }}><X size={16} /></button>
+              <Check size={16} strokeWidth={2.5} />
+            </button>
+            <button 
+              onClick={closeAddMenu} 
+              disabled={isProcessing} 
+              style={{ background: 'none', border: 'none', color: '#a0aec0', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center', transition: 'color 0.2s' }}
+              onMouseOver={(e) => { e.currentTarget.style.color = '#e53e3e'; }}
+              onMouseOut={(e) => { e.currentTarget.style.color = '#a0aec0'; }}
+            >
+              <X size={16} strokeWidth={2.5} />
+            </button>
           </div>
         ) : (
           <button 
