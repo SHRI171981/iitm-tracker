@@ -15,7 +15,6 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({ course }) => {
       border: '1px solid #e2e8f0', 
       borderRadius: '12px', 
       padding: '32px', 
-      marginBottom: '32px', 
       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', 
       width: '100%',
       display: 'flex',
@@ -25,9 +24,8 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({ course }) => {
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
         <h1 style={{ margin: 0, fontSize: '2rem', color: '#1a202c', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '-0.02em' }}>
-            {course.name}
+          {course.name}
         </h1>
-        
         <div style={{ display: 'flex', flexDirection: 'row', gap: '8px' }}>
           <CourseBadge bgColor="#e0e7ff" textColor="#4338ca">
             {course.code }

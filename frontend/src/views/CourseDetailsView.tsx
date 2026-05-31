@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCourseStore } from '@/stores/useCoursesStore';
 import CourseContentLayout from '@/components/course-details/CourseContentLayout';
+import CourseHeader from '@/components/course-details/CourseHeader';
 
 const EMPTY_ARRAY: any[] = [];
 
@@ -44,20 +45,7 @@ const CourseDetailsView: React.FC = () => {
 
   return (
     <div className="h-screen w-full flex flex-col bg-slate-50 font-sans overflow-hidden">
-      <div className="px-8 py-6 bg-white shrink-0 shadow-sm z-10">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">
-          {course.name}
-        </h1>
-        <div className="flex items-center gap-2 mt-2">
-          <span className="px-2 py-0.5 text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded">
-            {course.code}
-          </span>
-          <span className="px-2 py-0.5 text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 rounded">
-            {course.level}
-          </span>
-        </div>
-      </div>
-      
+      <CourseHeader course={course} />
       <CourseContentLayout course={course} weeks={weeks} />
     </div>
   );
