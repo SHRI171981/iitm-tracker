@@ -1,4 +1,3 @@
-// src/stores/useCoursesStore.ts
 import { create } from 'zustand';
 import apiClient from '@/api/axios';
 import type { Course, Week, Lecture } from '@/components/courses/types';
@@ -22,6 +21,8 @@ interface CourseStore {
   fetchStudentProgress: () => Promise<void>;
   toggleLectureCompletion: (lectureId: string) => Promise<void>;
   createCourse: (payload: any) => Promise<void>;
+  updateCourse: (courseId: string, payload: any) => Promise<void>;
+  deleteCourse: (courseId: string) => Promise<void>;
 }
 
 export const useCourseStore = create<CourseStore>((set, get) => ({
@@ -54,7 +55,7 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
         }));
       }
     } catch (error) {
-      console.error("Failed to fetch student progress", error);
+      console.error(error);
     }
   },
 
@@ -133,23 +134,46 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
         await apiClient.delete('/progress/delete', { data: payload });
       }
     } catch (error) {
-      console.error("Progress synchronization failed:", error);
       set((state) => ({ completedLectures: { ...state.completedLectures, [lectureId]: isCurrentlyCompleted } }));
     }
   },
 
   createCourse: async (payload) => {
-    try {
-      const response = await apiClient.post('/course/create', payload);
-      if (response.status === 200 || response.status === 201) {
-        const newCourse = response.data;
-        set((state) => ({
-          courses: [...state.courses, newCourse].sort((a: Course, b: Course) => a.name.localeCompare(b.name))
-        }));
-      }
-    } catch (error) {
-      console.error("Failed to create course", error);
-      throw error; 
+    const response = await apiClient.post('/course/create', payload);
+    if (response.status === 200 || response.status === 201) {
+      const newCourse = response.data;
+      set((state) => ({
+        courses: [...state.courses, newCourse].sort((a: Course, b: Course) => a.name.localeCompare(b.name))
+      }));
+    }
+  },
+
+  updateCourse: async (courseId, payload) => {
+    const response = await apiClient.patch(`/course/update/${courseId}`, payload);
+    if (response.status === 200) {
+      const updatedCourse = response.data;
+      set((state) => ({
+        courses: state.courses
+          .map((c) => (c.id === courseId ? updatedCourse : c))
+          .sort((a: Course, b: Course) => a.name.localeCompare(b.name)),
+        courseDetails: state.courseDetails[courseId] 
+          ? { ...state.courseDetails, [courseId]: updatedCourse } 
+          : state.courseDetails
+      }));
+    }
+  },
+
+  deleteCourse: async (courseId) => {
+    const response = await apiClient.delete(`/course/delete/${courseId}`);
+    if (response.status === 200 || response.status === 204) {
+      set((state) => {
+        const newCourseDetails = { ...state.courseDetails };
+        delete newCourseDetails[courseId];
+        return {
+          courses: state.courses.filter((c) => c.id !== courseId),
+          courseDetails: newCourseDetails
+        };
+      });
     }
   }
 }));

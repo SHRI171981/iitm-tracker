@@ -1,23 +1,28 @@
-// src/components/courses/CourseCreate.tsx
 import React, { useState } from 'react';
 import { useCourseStore } from '@/stores/useCoursesStore';
+import type { Course } from '@/components/courses/types';
 
 interface CourseCreateProps {
   onClose: () => void;
+  initialData?: Course;
 }
 
-const CourseCreate: React.FC<CourseCreateProps> = ({ onClose }) => {
+const CourseCreate: React.FC<CourseCreateProps> = ({ onClose, initialData }) => {
   const createCourse = useCourseStore((state) => state.createCourse);
+  const updateCourse = useCourseStore((state) => state.updateCourse);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const isEditMode = Boolean(initialData);
+
   const [formData, setFormData] = useState({
-    name: '',
-    code: '',
-    credits: '',
-    level: 'Foundation',
-    website: '',
-    playlist: ''
+    name: initialData?.name || '',
+    code: initialData?.code || '',
+    credits: initialData?.credits !== undefined ? String(initialData.credits) : '',
+    level: initialData?.level || 'Foundation',
+    website: initialData?.website || '',
+    playlist: initialData?.playlist || ''
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -33,31 +38,40 @@ const CourseCreate: React.FC<CourseCreateProps> = ({ onClose }) => {
     try {
       const payload = {
         ...formData,
-        credits: parseInt(formData.credits, 10),
+        credits: parseInt(String(formData.credits), 10),
         website: formData.website || null,
         playlist: formData.playlist || null
       };
       
-      await createCourse(payload);
+      if (isEditMode && initialData?.id) {
+        await updateCourse(initialData.id, payload);
+      } else {
+        await createCourse(payload);
+      }
+      
       onClose();
     } catch (error: any) {
-      setErrorMsg(error.response?.data?.message || "An error occurred while creating the course.");
+      setErrorMsg(error.response?.data?.message || "An error occurred while processing the course.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}>
-      
+    <div 
+      onClick={(e) => e.stopPropagation()} 
+      style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}
+    >
       <div style={{ backgroundColor: '#fff', borderRadius: '12px', width: '100%', maxWidth: '500px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', overflow: 'hidden' }}>
         
         <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#1a202c' }}>Add New Course</h2>
+          <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#1a202c' }}>
+            {isEditMode ? 'Edit Course' : 'Add New Course'}
+          </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#a0aec0' }}>&times;</button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
+        <form onSubmit={handleSubmit} style={{ padding: '24px', textAlign: 'left' }}>
           
           {errorMsg && (
             <div style={{ padding: '12px', marginBottom: '16px', backgroundColor: '#fff5f5', color: '#c53030', borderRadius: '6px', fontSize: '0.875rem' }}>
@@ -107,7 +121,7 @@ const CourseCreate: React.FC<CourseCreateProps> = ({ onClose }) => {
               Cancel
             </button>
             <button type="submit" disabled={isSubmitting} style={{ padding: '10px 20px', border: 'none', backgroundColor: '#4f46e5', color: '#fff', borderRadius: '6px', fontWeight: 600, cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
-              {isSubmitting ? 'Adding...' : 'Add Course'}
+              {isSubmitting ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Add Course')}
             </button>
           </div>
 
