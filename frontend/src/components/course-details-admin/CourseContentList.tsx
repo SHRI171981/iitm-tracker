@@ -1,7 +1,7 @@
 // @/components/course-details-admin/CourseContentList.tsx
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { useCourseStore } from '@/stores/useCoursesStore';
+import { useCourseAdminStore } from '@/stores/useCourseAdminStore';
 import WeekContainer from '@/components/course-details-admin/WeekContainer';
 import type { Week } from '@/components/course-details-admin/types';
 
@@ -11,7 +11,7 @@ interface CourseContentListProps {
 }
 
 const CourseContentList: React.FC<CourseContentListProps> = ({ courseId, weeks }) => {
-  const createWeek = useCourseStore((state) => state.createWeek);
+  const createWeek = useCourseAdminStore((state) => state.createWeek);
   
   const [newWeekName, setNewWeekName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);

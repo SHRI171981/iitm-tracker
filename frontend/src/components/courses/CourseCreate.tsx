@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useCourseStore } from '@/stores/useCoursesStore';
+import { useCourseAdminStore } from '@/stores/useCourseAdminStore';
 import type { Course } from '@/components/courses/types';
 
 interface CourseCreateProps {
@@ -8,8 +8,8 @@ interface CourseCreateProps {
 }
 
 const CourseCreate: React.FC<CourseCreateProps> = ({ onClose, initialData }) => {
-  const createCourse = useCourseStore((state) => state.createCourse);
-  const updateCourse = useCourseStore((state) => state.updateCourse);
+  const createCourse = useCourseAdminStore((state) => state.createCourse);
+  const updateCourse = useCourseAdminStore((state) => state.updateCourse);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);

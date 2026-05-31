@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useCourseStore } from '@/stores/useCoursesStore';
+import { useCourseStore } from '@/stores/useCourseStore';
 import CourseContentLayout from '@/components/course-details/CourseContentLayout';
 import CourseHeader from '@/components/course-details/CourseHeader';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Course, Week } from '@/components/courses/types';
-import { useCourseStore } from '@/stores/useCoursesStore';
+import { useCourseStore } from '@/stores/useCourseStore';
 import SyllabusSidebar from '@/components/course-details/SyllabusSidebar';
 
 interface CourseContentLayoutProps {

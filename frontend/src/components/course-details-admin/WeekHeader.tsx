@@ -1,7 +1,7 @@
 // @/components/course-details-admin/WeekHeader.tsx
 import React, { useState } from 'react';
 import { Edit2, Trash2, ChevronDown, ChevronRight, Check, X } from 'lucide-react';
-import { useCourseStore } from '@/stores/useCoursesStore';
+import { useCourseAdminStore } from '@/stores/useCourseAdminStore';
 import type { Week } from '@/components/course-details-admin/types';
 
 interface WeekHeaderProps {
@@ -11,8 +11,8 @@ interface WeekHeaderProps {
 }
 
 const WeekHeader: React.FC<WeekHeaderProps> = ({ week, isExpanded, onToggleExpand }) => {
-  const updateWeek = useCourseStore((state) => state.updateWeek);
-  const deleteWeek = useCourseStore((state) => state.deleteWeek);
+  const updateWeek = useCourseAdminStore((state) => state.updateWeek);
+  const deleteWeek = useCourseAdminStore((state) => state.deleteWeek);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(week.name);

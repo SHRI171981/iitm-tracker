@@ -1,22 +1,22 @@
 // @/components/course-details-admin/CoursePrerequisites.tsx
 import React, { useEffect, useState } from 'react';
 import { Plus, Check, X } from 'lucide-react';
-import { useCourseStore } from '@/stores/useCoursesStore';
+import { useCourseAdminStore } from '@/stores/useCourseAdminStore';
 import CourseBadge from '@/components/course-details-admin/CourseBadge';
 
 const EMPTY_ARRAY: any[] = [];
 
 const CoursePrerequisites: React.FC<{ courseId: string }> = ({ courseId }) => {
-  const fetchDependencies = useCourseStore((state) => state.fetchDependencies);
-  const fetchSomeCourses = useCourseStore((state) => state.fetchSomeCourses);
-  const fetchCourses = useCourseStore((state) => state.fetchCourses);
+  const fetchDependencies = useCourseAdminStore((state) => state.fetchDependencies);
+  const fetchSomeCourses = useCourseAdminStore((state) => state.fetchSomeCourses);
+  const fetchCourses = useCourseAdminStore((state) => state.fetchCourses);
   
-  const createDependency = useCourseStore((state) => state.createDependency);
-  const deleteDependency = useCourseStore((state) => state.deleteDependency);
+  const createDependency = useCourseAdminStore((state) => state.createDependency);
+  const deleteDependency = useCourseAdminStore((state) => state.deleteDependency);
   
-  const dependencies = useCourseStore((state) => state.dependenciesByCourse[courseId] ?? EMPTY_ARRAY);
-  const courseDetails = useCourseStore((state) => state.courseDetails);
-  const allCourses = useCourseStore((state) => state.courses);
+  const dependencies = useCourseAdminStore((state) => state.dependenciesByCourse[courseId] ?? EMPTY_ARRAY);
+  const courseDetails = useCourseAdminStore((state) => state.courseDetails);
+  const allCourses = useCourseAdminStore((state) => state.courses);
 
   const [isAdding, setIsAdding] = useState(false);
   const [selectedPrereqId, setSelectedPrereqId] = useState('');

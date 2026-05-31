@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Check, X } from 'lucide-react';
-import { useCourseStore } from '@/stores/useCoursesStore';
+import { useCourseStore } from '@/stores/useCourseStore';
 import CourseBadge from '@/components/course-details-admin/CourseBadge';
 
 const EMPTY_ARRAY: any[] = [];
@@ -13,9 +13,6 @@ const CoursePrerequisites: React.FC<{ courseId: string }> = ({ courseId }) => {
   const fetchDependencies = useCourseStore((state) => state.fetchDependencies);
   const fetchSomeCourses = useCourseStore((state) => state.fetchSomeCourses);
   const fetchCourses = useCourseStore((state) => state.fetchCourses);
-  
-  const createDependency = useCourseStore((state) => state.createDependency);
-  const deleteDependency = useCourseStore((state) => state.deleteDependency);
   
   const dependencies = useCourseStore((state) => state.dependenciesByCourse[courseId] ?? EMPTY_ARRAY);
   const courseDetails = useCourseStore((state) => state.courseDetails);
@@ -46,43 +43,6 @@ const CoursePrerequisites: React.FC<{ courseId: string }> = ({ courseId }) => {
     }
   }, [dependencies, courseDetails, fetchSomeCourses]);
 
-  const handleDelete = async (dependencyId: string) => {
-    if (!window.confirm("Are you sure you want to remove this prerequisite?")) {
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      await deleteDependency(courseId, dependencyId);
-    } catch (error) {
-      console.error("Failed to delete prerequisite");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleAddSubmit = async () => {
-    if (!selectedPrereqId) return;
-    setIsProcessing(true);
-    try {
-      await createDependency({
-        from_course_id: selectedPrereqId,
-        to_course_id: courseId
-      });
-      closeAddMenu();
-    } catch (error) {
-      console.error("Failed to add prerequisite");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const closeAddMenu = () => {
-    setIsAdding(false);
-    setSelectedPrereqId('');
-    setSearchTerm('');
-    setIsDropdownOpen(false);
-  };
 
   const handlePreReqClick = (targetCourseId: string) => {
     navigate(`/courses/${targetCourseId}`);
@@ -121,7 +81,6 @@ const CoursePrerequisites: React.FC<{ courseId: string }> = ({ courseId }) => {
                 bgColor="#fff7ed"
                 borderColor="#fed7aa"
                 textColor="#ea580c"
-                onDelete={() => handleDelete(dep.id)}
                 disabled={isProcessing || isLoading}
               >
                 <span 
@@ -191,24 +150,6 @@ const CoursePrerequisites: React.FC<{ courseId: string }> = ({ courseId }) => {
                 No matching courses found.
               </div>
             )}
-
-            {/* Action Buttons */}
-            <button 
-              onClick={handleAddSubmit} 
-              disabled={isProcessing || !selectedPrereqId} 
-              style={{ background: 'none', border: 'none', color: selectedPrereqId && !isProcessing ? '#38a169' : '#a0aec0', cursor: selectedPrereqId && !isProcessing ? 'pointer' : 'not-allowed', padding: '2px', display: 'flex', alignItems: 'center', transition: 'color 0.2s' }}
-            >
-              <Check size={16} strokeWidth={2.5} />
-            </button>
-            <button 
-              onClick={closeAddMenu} 
-              disabled={isProcessing} 
-              style={{ background: 'none', border: 'none', color: '#a0aec0', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center', transition: 'color 0.2s' }}
-              onMouseOver={(e) => { e.currentTarget.style.color = '#e53e3e'; }}
-              onMouseOut={(e) => { e.currentTarget.style.color = '#a0aec0'; }}
-            >
-              <X size={16} strokeWidth={2.5} />
-            </button>
           </div>
         ) : (
           <button 

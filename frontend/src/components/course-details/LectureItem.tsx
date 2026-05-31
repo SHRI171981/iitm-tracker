@@ -1,7 +1,7 @@
 import React from 'react';
 import { CheckSquare, Square } from 'lucide-react';
 import type { Lecture } from '@/components/courses/types';
-import { useCourseStore } from '@/stores/useCoursesStore';
+import { useCourseStore } from '@/stores/useCourseStore';
 
 interface LectureItemProps {
   lecture: Lecture;

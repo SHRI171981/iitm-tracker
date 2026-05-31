@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { Week } from '@/components/courses/types';
-import { useCourseStore } from '@/stores/useCoursesStore';
+import { useCourseStore } from '@/stores/useCourseStore';
 import LectureItem from '@/components/course-details/LectureItem';
 
 interface WeekItemProps {

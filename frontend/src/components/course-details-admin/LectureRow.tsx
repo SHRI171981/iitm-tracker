@@ -1,7 +1,7 @@
 // @/components/course-details-admin/LectureRow.tsx
 import React, { useState } from 'react';
 import { Edit2, Trash2, Check, X } from 'lucide-react';
-import { useCourseStore } from '@/stores/useCoursesStore';
+import { useCourseAdminStore } from '@/stores/useCourseAdminStore';
 import type { Lecture } from '@/components/course-details-admin/types';
 
 interface LectureRowProps {
@@ -10,8 +10,8 @@ interface LectureRowProps {
 }
 
 const LectureRow: React.FC<LectureRowProps> = ({ lecture, weekNum }) => {
-  const updateLecture = useCourseStore((state) => state.updateLecture);
-  const deleteLecture = useCourseStore((state) => state.deleteLecture);
+  const updateLecture = useCourseAdminStore((state) => state.updateLecture);
+  const deleteLecture = useCourseAdminStore((state) => state.deleteLecture);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(lecture.name);

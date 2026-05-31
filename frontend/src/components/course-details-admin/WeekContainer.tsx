@@ -1,7 +1,7 @@
 // @/components/course-details-admin/WeekContainer.tsx
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { useCourseStore } from '@/stores/useCoursesStore';
+import { useCourseAdminStore } from '@/stores/useCourseAdminStore';
 import WeekHeader from '@/components/course-details-admin/WeekHeader';
 import LectureRow from '@/components/course-details-admin/LectureRow';
 import type { Week } from '@/components/course-details-admin/types';
@@ -14,10 +14,10 @@ const EMPTY_ARRAY: any[] = [];
 
 const WeekContainer: React.FC<WeekContainerProps> = ({ week }) => {
   // Utilizing EMPTY_ARRAY reference outside of the selector to prevent infinite re-renders
-  const lecturesData = useCourseStore((state) => state.lecturesByWeek[week.id]);
+  const lecturesData = useCourseAdminStore((state) => state.lecturesByWeek[week.id]);
   const lectures = lecturesData || EMPTY_ARRAY;
   
-  const createLecture = useCourseStore((state) => state.createLecture);
+  const createLecture = useCourseAdminStore((state) => state.createLecture);
   
   const [isExpanded, setIsExpanded] = useState(false);
   const [newLectureName, setNewLectureName] = useState('');

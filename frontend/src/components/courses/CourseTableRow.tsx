@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Link, Play, Edit, Trash2 } from 'lucide-react';
 import type { Course } from '@/components/courses/types';
 import CourseCreate from '@/components/courses/CourseCreate';
-import { useCourseStore } from '@/stores/useCoursesStore';
+import { useCourseAdminStore } from '@/stores/useCourseAdminStore';
 
 interface CourseTableRowProps {
   course: Course;
@@ -11,7 +11,7 @@ interface CourseTableRowProps {
 
 const CourseTableRow: React.FC<CourseTableRowProps> = ({ course }) => {
   const navigate = useNavigate();
-  const deleteCourse = useCourseStore((state) => state.deleteCourse);
+  const deleteCourse = useCourseAdminStore((state) => state.deleteCourse);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 

@@ -1,16 +1,16 @@
 // src/components/courses/CourseDataGrid.tsx
 import React, { useState, useEffect } from 'react';
 import type { Course } from '@/components/courses/types';
-import { useCourseStore } from '@/stores/useCoursesStore';
+import { useCourseAdminStore } from '@/stores/useCourseAdminStore';
 import CourseTableHeader from '@/components/courses/CourseTableHeader';
 import CourseTableRow from '@/components/courses/CourseTableRow';
 import CourseCreate from '@/components/courses/CourseCreate';
 
 const CourseDataGrid: React.FC = () => {
-  const courses = useCourseStore((state) => state.courses);
-  const loading = useCourseStore((state) => state.loading);
-  const error = useCourseStore((state) => state.error);
-  const fetchCourses = useCourseStore((state) => state.fetchCourses);
+  const courses = useCourseAdminStore((state) => state.courses);
+  const loading = useCourseAdminStore((state) => state.loading);
+  const error = useCourseAdminStore((state) => state.error);
+  const fetchCourses = useCourseAdminStore((state) => state.fetchCourses);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState<'All' | Course['level']>('All');

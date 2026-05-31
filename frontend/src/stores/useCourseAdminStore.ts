@@ -1,16 +1,13 @@
-// src/stores/useCoursesStore.ts
 import { create } from 'zustand';
 import apiClient from '@/api/axios';
 import type { Course, Week, Lecture, Dependency } from '@/components/course-details-admin/types';
 
-interface CourseStore {
+interface CourseAdminStore {
   courses: Course[];
   courseDetails: Record<string, Course>;
   weeksByCourse: Record<string, Week[]>;
   lecturesByWeek: Record<string, Lecture[]>;
   dependenciesByCourse: Record<string, Dependency[]>;
-  completedLectures: Record<string, boolean>;
-  studentProgressFetched: boolean;
   loading: boolean;
   fetchingCourse: Record<string, boolean>;
   fetchingWeeks: Record<string, boolean>;
@@ -24,8 +21,7 @@ interface CourseStore {
   fetchWeeks: (courseId: string) => Promise<void>;
   fetchLectures: (weekId: string) => Promise<void>;
   fetchDependencies: (courseId: string) => Promise<void>;
-  fetchStudentProgress: () => Promise<void>;
-  toggleLectureCompletion: (lectureId: string) => Promise<void>;
+  
   createCourse: (payload: any) => Promise<void>;
   updateCourse: (courseId: string, payload: any) => Promise<void>;
   deleteCourse: (courseId: string) => Promise<void>;
@@ -42,41 +38,18 @@ interface CourseStore {
   deleteDependency: (toCourseId: string, dependencyId: string) => Promise<void>;
 }
 
-export const useCourseStore = create<CourseStore>((set, get) => ({
+export const useCourseAdminStore = create<CourseAdminStore>((set, get) => ({
   courses: [],
   courseDetails: {},
   weeksByCourse: {},
   lecturesByWeek: {},
   dependenciesByCourse: {},
-  completedLectures: {},
-  studentProgressFetched: false,
   loading: false,
   fetchingCourse: {},
   fetchingWeeks: {},
   fetchingLectures: {},
   fetchingDependencies: {},
   error: null,
-
-  fetchStudentProgress: async () => {
-    if (get().studentProgressFetched) return;
-    try {
-      const studentId = "baf10deb-b014-4519-81c8-f195ad2deeff";
-      const response = await apiClient.get(`/progress/student/all/${studentId}`);
-      if (response.status === 200) {
-        const progressMap: Record<string, boolean> = {};
-        response.data.forEach((item: any) => {
-          const id = typeof item === 'string' ? item : item.lecture_id;
-          if (id) progressMap[id] = true;
-        });
-        set((state) => ({
-          completedLectures: { ...state.completedLectures, ...progressMap },
-          studentProgressFetched: true
-        }));
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  },
 
   fetchCourses: async () => {
     if (get().courses.length > 0 || get().loading) return;
@@ -175,21 +148,6 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
     }
   },
 
-  toggleLectureCompletion: async (lectureId) => {
-    const isCurrentlyCompleted = !!get().completedLectures[lectureId];
-    set((state) => ({ completedLectures: { ...state.completedLectures, [lectureId]: !isCurrentlyCompleted } }));
-    const payload = { student_id: "baf10deb-b014-4519-81c8-f195ad2deeff", lecture_id: lectureId };
-    try {
-      if (!isCurrentlyCompleted) {
-        await apiClient.post('/progress/record', payload);
-      } else {
-        await apiClient.delete('/progress/delete', { data: payload });
-      }
-    } catch (error) {
-      set((state) => ({ completedLectures: { ...state.completedLectures, [lectureId]: isCurrentlyCompleted } }));
-    }
-  },
-
   createCourse: async (payload) => {
     const response = await apiClient.post('/course/create', payload);
     if (response.status === 200 || response.status === 201) {
@@ -229,10 +187,6 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
     }
   },
 
-  // ---------------------------------------------------------
-  // DEPENDENCY CRUD OPERATIONS
-  // ---------------------------------------------------------
-
   createDependency: async (payload) => {
     const response = await apiClient.post('/dependency/create', payload);
     if (response.status === 200 || response.status === 201) {
@@ -256,10 +210,6 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
       }));
     }
   },
-
-  // ---------------------------------------------------------
-  // WEEK CRUD OPERATIONS
-  // ---------------------------------------------------------
   
   createWeek: async (payload) => {
     const response = await apiClient.post('/week/create', payload);
@@ -318,10 +268,6 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
       });
     }
   },
-
-  // ---------------------------------------------------------
-  // LECTURE CRUD OPERATIONS
-  // ---------------------------------------------------------
 
   createLecture: async (payload) => {
     const response = await apiClient.post('/lecture/create', payload);

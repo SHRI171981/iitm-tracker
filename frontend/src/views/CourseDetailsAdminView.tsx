@@ -1,7 +1,7 @@
 // @/components/course-details-admin/CourseDetailsAdminView.tsx
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useCourseStore } from '@/stores/useCoursesStore';
+import { useCourseAdminStore } from '@/stores/useCourseAdminStore';
 import CourseHeader from '@/components/course-details-admin/CourseHeader';
 import CourseContentList from '@/components/course-details-admin/CourseContentList';
 
@@ -11,17 +11,17 @@ const CourseDetailsAdminView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const courseId = id || '';
 
-  const fetchCourseDetails = useCourseStore((state) => state.fetchCourseDetails);
-  const fetchWeeks = useCourseStore((state) => state.fetchWeeks);
+  const fetchCourseDetails = useCourseAdminStore((state) => state.fetchCourseDetails);
+  const fetchWeeks = useCourseAdminStore((state) => state.fetchWeeks);
   
-  const course = useCourseStore((state) => state.courseDetails[courseId]);
+  const course = useCourseAdminStore((state) => state.courseDetails[courseId]);
   
   // Extract data first, apply fallback outside the selector to prevent infinite loops
-  const weeksData = useCourseStore((state) => state.weeksByCourse[courseId]);
+  const weeksData = useCourseAdminStore((state) => state.weeksByCourse[courseId]);
   const weeks = weeksData || EMPTY_ARRAY;
   
-  const isFetchingCourse = useCourseStore((state) => state.fetchingCourse[courseId]);
-  const isFetchingWeeks = useCourseStore((state) => state.fetchingWeeks[courseId]);
+  const isFetchingCourse = useCourseAdminStore((state) => state.fetchingCourse[courseId]);
+  const isFetchingWeeks = useCourseAdminStore((state) => state.fetchingWeeks[courseId]);
 
   useEffect(() => {
     if (courseId) {
