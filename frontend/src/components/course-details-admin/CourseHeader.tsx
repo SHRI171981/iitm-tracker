@@ -28,12 +28,12 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({ course }) => {
           {course.code} - {course.name}
         </h1>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{ display: 'flex', flexDirection: 'row', gap: '8px' }}>
           <CourseBadge bgColor="#e0e7ff" textColor="#4338ca">
-            {course.level}
+            {course.level || 'No Level Info'}
           </CourseBadge>
           <CourseBadge bgColor="#f1f5f9" textColor="#475569">
-            {course.credits} Credits
+            {course.credits ? `${course.credits} Credits` : 'No Credits Info'}
           </CourseBadge>
         </div>
       </div>
