@@ -6,24 +6,21 @@ import type { Lecture } from '@/components/course-details-admin/types';
 interface LectureRowProps {
   lecture: Lecture;
   weekNum: number;
-  onUpdate: (lectureId: string, newName: string) => void;
-  onDelete: (lectureId: string) => void;
 }
 
-const LectureRow: React.FC<LectureRowProps> = ({ lecture, weekNum, onUpdate, onDelete }) => {
+const LectureRow: React.FC<LectureRowProps> = ({ lecture, weekNum }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(lecture.name);
 
   const handleSave = () => {
-    if (editName.trim()) {
-      onUpdate(lecture.id, editName.trim());
-    }
+    // Placeholder: Does nothing for now
     setIsEditing(false);
   };
 
   const handleDelete = () => {
     if (window.confirm("Are you sure you want to delete this lecture?")) {
-      onDelete(lecture.id);
+      // Placeholder: Does nothing for now
+      console.log("Delete lecture", lecture.id);
     }
   };
 

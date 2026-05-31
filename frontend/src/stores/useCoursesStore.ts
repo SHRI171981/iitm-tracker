@@ -138,15 +138,7 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
     }
   },
 
-  createCourse: async (payload) => {
-    const response = await apiClient.post('/course/create', payload);
-    if (response.status === 200 || response.status === 201) {
-      const newCourse = response.data;
-      set((state) => ({
-        courses: [...state.courses, newCourse].sort((a: Course, b: Course) => a.name.localeCompare(b.name))
-      }));
-    }
-  },
+
 
   updateCourse: async (courseId, payload) => {
     const response = await apiClient.patch(`/course/update/${courseId}`, payload);

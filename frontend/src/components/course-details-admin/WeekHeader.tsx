@@ -7,25 +7,22 @@ interface WeekHeaderProps {
   week: Week;
   isExpanded: boolean;
   onToggleExpand: () => void;
-  onUpdate: (weekId: string, newName: string) => void;
-  onDelete: (weekId: string) => void;
 }
 
-const WeekHeader: React.FC<WeekHeaderProps> = ({ week, isExpanded, onToggleExpand, onUpdate, onDelete }) => {
+const WeekHeader: React.FC<WeekHeaderProps> = ({ week, isExpanded, onToggleExpand }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(week.name);
 
   const handleSave = () => {
-    if (editName.trim()) {
-      onUpdate(week.id, editName.trim());
-    }
+    // Placeholder: Does nothing for now
     setIsEditing(false);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (window.confirm("Are you sure you want to delete this week and all its lectures?")) {
-      onDelete(week.id);
+      // Placeholder: Does nothing for now
+      console.log("Delete week", week.id);
     }
   };
 

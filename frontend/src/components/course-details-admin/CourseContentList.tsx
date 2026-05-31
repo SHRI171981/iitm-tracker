@@ -2,26 +2,21 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import WeekContainer from '@/components/course-details-admin/WeekContainer';
-import type { Week, Lecture } from '@/components/course-details-admin/types';
+import type { Week, Course } from '@/components/course-details-admin/types';
 
 interface CourseContentListProps {
+  course: Course;
   weeks: Week[];
-  lectures: Lecture[];
-  onAddWeek: (name: string) => void;
-  onUpdateWeek: (weekId: string, newName: string) => void;
-  onDeleteWeek: (weekId: string) => void;
-  onAddLecture: (weekId: string, name: string) => void;
-  onUpdateLecture: (lectureId: string, newName: string) => void;
-  onDeleteLecture: (lectureId: string) => void;
 }
 
-const CourseContentList: React.FC<CourseContentListProps> = ({ weeks, lectures, onAddWeek, onUpdateWeek, onDeleteWeek, onAddLecture, onUpdateLecture, onDeleteLecture }) => {
+const CourseContentList: React.FC<CourseContentListProps> = ({ course, weeks }) => {
   const [newWeekName, setNewWeekName] = useState('');
 
   const handleAddWeekSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newWeekName.trim()) {
-      onAddWeek(newWeekName.trim());
+      // Placeholder: Does nothing for now
+      console.log("Add week:", newWeekName.trim());
       setNewWeekName('');
     }
   };
@@ -31,16 +26,7 @@ const CourseContentList: React.FC<CourseContentListProps> = ({ weeks, lectures, 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
       {sortedWeeks.map(week => (
-        <WeekContainer 
-          key={week.id}
-          week={week}
-          lectures={lectures.filter(l => l.week_id === week.id)}
-          onUpdateWeek={onUpdateWeek}
-          onDeleteWeek={onDeleteWeek}
-          onAddLecture={onAddLecture}
-          onUpdateLecture={onUpdateLecture}
-          onDeleteLecture={onDeleteLecture}
-        />
+        <WeekContainer key={week.id} week={week} />
       ))}
 
       <div style={{ backgroundColor: '#f8fafc', border: '1px dashed #cbd5e0', borderRadius: '12px', padding: '24px', marginTop: '8px' }}>

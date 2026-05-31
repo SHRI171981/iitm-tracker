@@ -1,33 +1,33 @@
 // @/components/course-details-admin/WeekContainer.tsx
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
+import { useCourseStore } from '@/stores/useCoursesStore';
 import WeekHeader from '@/components/course-details-admin/WeekHeader';
 import LectureRow from '@/components/course-details-admin/LectureRow';
-import type { Week, Lecture } from '@/components/course-details-admin/types';
+import type { Week } from '@/components/course-details-admin/types';
 
 interface WeekContainerProps {
   week: Week;
-  lectures: Lecture[];
-  onUpdateWeek: (weekId: string, newName: string) => void;
-  onDeleteWeek: (weekId: string) => void;
-  onAddLecture: (weekId: string, name: string) => void;
-  onUpdateLecture: (lectureId: string, newName: string) => void;
-  onDeleteLecture: (lectureId: string) => void;
 }
 
-const WeekContainer: React.FC<WeekContainerProps> = ({ week, lectures, onUpdateWeek, onDeleteWeek, onAddLecture, onUpdateLecture, onDeleteLecture }) => {
+const EMPTY_ARRAY: any[] = [];
+
+const WeekContainer: React.FC<WeekContainerProps> = ({ week }) => {
+  // Use the nullish coalescing operator with a stable reference
+  const lectures = useCourseStore((state) => state.lecturesByWeek[week.id] ?? EMPTY_ARRAY);
+  
   const [isExpanded, setIsExpanded] = useState(false);
   const [newLectureName, setNewLectureName] = useState('');
 
   const handleAddLectureSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newLectureName.trim()) {
-      onAddLecture(week.id, newLectureName.trim());
+      // Placeholder: Does nothing for now
+      console.log("Add lecture:", newLectureName.trim());
       setNewLectureName('');
     }
   };
 
-  // Sort lectures by their automatically assigned number
   const sortedLectures = [...lectures].sort((a, b) => a.num - b.num);
 
   return (
@@ -36,8 +36,6 @@ const WeekContainer: React.FC<WeekContainerProps> = ({ week, lectures, onUpdateW
         week={week}
         isExpanded={isExpanded}
         onToggleExpand={() => setIsExpanded(!isExpanded)}
-        onUpdate={onUpdateWeek}
-        onDelete={onDeleteWeek}
       />
 
       {isExpanded && (
@@ -51,8 +49,6 @@ const WeekContainer: React.FC<WeekContainerProps> = ({ week, lectures, onUpdateW
                   key={lecture.id}
                   lecture={lecture}
                   weekNum={week.num}
-                  onUpdate={onUpdateLecture}
-                  onDelete={onDeleteLecture}
                 />
               ))
             )}
