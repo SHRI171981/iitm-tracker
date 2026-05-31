@@ -64,8 +64,9 @@ async def update_course(course_id: UUID, course_data: course.CourseCreate, db: S
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Course code or name already exists")
     
     try:
-        _course.name = course_data.name if course_data.name is not None else _course.name
-        _course.code = course_data.code if course_data.code is not None else _course.code
+        for key, value in course_data.model_dump().items():
+            setattr(_course, key, value)
+        _course.num_hours = await calculate_total_hours(course_data.playlist) if course_data.playlist else None
         db.commit()
         db.refresh(_course)
         _course.num_weeks = len(_course.weeks)
