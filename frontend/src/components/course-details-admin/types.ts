@@ -1,5 +1,4 @@
 // @/components/course-details-admin/types.ts
-
 export interface Course {
   id: number | string;
   name: string;
@@ -24,4 +23,10 @@ export interface Lecture {
   name: string;
   num: number;
   week_id: string;
+}
+
+export interface Dependency {
+  id: string;
+  from_course_id: string;
+  to_course_id: string;
 }

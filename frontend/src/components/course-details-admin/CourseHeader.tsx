@@ -28,7 +28,7 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({ course }) => {
           {course.code} - {course.name}
         </h1>
         
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '8px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <CourseBadge bgColor="#e0e7ff" textColor="#4338ca">
             {course.level}
           </CourseBadge>
@@ -38,7 +38,8 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({ course }) => {
         </div>
       </div>
 
-      <CoursePrerequisites />
+      {/* Renders the dynamic prerequisites manager based on the actual course ID */}
+      <CoursePrerequisites courseId={String(course.id)} />
       
     </div>
   );

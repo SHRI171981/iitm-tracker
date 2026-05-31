@@ -8,9 +8,10 @@ interface CourseBadgeProps {
   borderColor?: string;
   textColor: string;
   onDelete?: () => void;
+  disabled?: boolean;
 }
 
-const CourseBadge: React.FC<CourseBadgeProps> = ({ children, bgColor, borderColor, textColor, onDelete }) => {
+const CourseBadge: React.FC<CourseBadgeProps> = ({ children, bgColor, borderColor, textColor, onDelete, disabled }) => {
   return (
     <div 
       style={{ 
@@ -25,7 +26,9 @@ const CourseBadge: React.FC<CourseBadgeProps> = ({ children, bgColor, borderColo
         fontSize: '0.85rem', 
         fontWeight: 600,
         transition: 'all 0.2s ease-in-out',
-        width: 'max-content'
+        width: 'max-content',
+        opacity: disabled ? 0.6 : 1,
+        pointerEvents: disabled ? 'none' : 'auto'
       }}
     >
       {children}

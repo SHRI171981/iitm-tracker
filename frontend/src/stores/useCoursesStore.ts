@@ -1,13 +1,7 @@
 // src/stores/useCoursesStore.ts
 import { create } from 'zustand';
 import apiClient from '@/api/axios';
-import type { Course, Week, Lecture } from '@/components/course-details-admin/types';
-
-export interface Dependency {
-  id: string;
-  from_course_id: string;
-  to_course_id: string;
-}
+import type { Course, Week, Lecture, Dependency } from '@/components/course-details-admin/types';
 
 interface CourseStore {
   courses: Course[];
