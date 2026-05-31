@@ -3,23 +3,33 @@ import { create } from 'zustand';
 import apiClient from '@/api/axios';
 import type { Course, Week, Lecture } from '@/components/course-details-admin/types';
 
+export interface Dependency {
+  id: string;
+  from_course_id: string;
+  to_course_id: string;
+}
+
 interface CourseStore {
   courses: Course[];
   courseDetails: Record<string, Course>;
   weeksByCourse: Record<string, Week[]>;
   lecturesByWeek: Record<string, Lecture[]>;
+  dependenciesByCourse: Record<string, Dependency[]>;
   completedLectures: Record<string, boolean>;
   studentProgressFetched: boolean;
   loading: boolean;
   fetchingCourse: Record<string, boolean>;
   fetchingWeeks: Record<string, boolean>;
   fetchingLectures: Record<string, boolean>;
+  fetchingDependencies: Record<string, boolean>;
   error: string | null;
   
   fetchCourses: () => Promise<void>;
   fetchCourseDetails: (courseId: string) => Promise<void>;
+  fetchSomeCourses: (courseIds: string[]) => Promise<void>;
   fetchWeeks: (courseId: string) => Promise<void>;
   fetchLectures: (weekId: string) => Promise<void>;
+  fetchDependencies: (courseId: string) => Promise<void>;
   fetchStudentProgress: () => Promise<void>;
   toggleLectureCompletion: (lectureId: string) => Promise<void>;
   createCourse: (payload: any) => Promise<void>;
@@ -33,6 +43,9 @@ interface CourseStore {
   createLecture: (payload: { name: string; num: number; week_id: string }) => Promise<void>;
   updateLecture: (lectureId: string, payload: { name: string; num: number; week_id: string }) => Promise<void>;
   deleteLecture: (weekId: string, lectureId: string) => Promise<void>;
+
+  createDependency: (payload: { from_course_id: string; to_course_id: string }) => Promise<void>;
+  deleteDependency: (toCourseId: string, dependencyId: string) => Promise<void>;
 }
 
 export const useCourseStore = create<CourseStore>((set, get) => ({
@@ -40,12 +53,14 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
   courseDetails: {},
   weeksByCourse: {},
   lecturesByWeek: {},
+  dependenciesByCourse: {},
   completedLectures: {},
   studentProgressFetched: false,
   loading: false,
   fetchingCourse: {},
   fetchingWeeks: {},
   fetchingLectures: {},
+  fetchingDependencies: {},
   error: null,
 
   fetchStudentProgress: async () => {
@@ -95,6 +110,39 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
       }
     } catch (error: any) {
       set((state) => ({ error: "Failed to fetch course details", fetchingCourse: { ...state.fetchingCourse, [courseId]: false } }));
+    }
+  },
+
+  fetchSomeCourses: async (courseIds) => {
+    if (!courseIds || courseIds.length === 0) return;
+    try {
+      const response = await apiClient.post('/course/some', courseIds);
+      if (response.status === 200) {
+        const fetchedCourses = response.data;
+        const newDetails = { ...get().courseDetails };
+        fetchedCourses.forEach((c: Course) => {
+          newDetails[c.id] = c;
+        });
+        set({ courseDetails: newDetails });
+      }
+    } catch (error) {
+      console.error("Failed to fetch bulk course details", error);
+    }
+  },
+
+  fetchDependencies: async (courseId) => {
+    if (get().dependenciesByCourse[courseId] || get().fetchingDependencies[courseId]) return;
+    set((state) => ({ fetchingDependencies: { ...state.fetchingDependencies, [courseId]: true } }));
+    try {
+      const response = await apiClient.get(`/dependency/to/${courseId}`);
+      if (response.status === 200) {
+        set((state) => ({
+          dependenciesByCourse: { ...state.dependenciesByCourse, [courseId]: response.data },
+          fetchingDependencies: { ...state.fetchingDependencies, [courseId]: false }
+        }));
+      }
+    } catch (error) {
+      set((state) => ({ fetchingDependencies: { ...state.fetchingDependencies, [courseId]: false } }));
     }
   },
 
@@ -188,6 +236,34 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
   },
 
   // ---------------------------------------------------------
+  // DEPENDENCY CRUD OPERATIONS
+  // ---------------------------------------------------------
+
+  createDependency: async (payload) => {
+    const response = await apiClient.post('/dependency/create', payload);
+    if (response.status === 200 || response.status === 201) {
+      set((state) => ({
+        dependenciesByCourse: {
+          ...state.dependenciesByCourse,
+          [payload.to_course_id]: [...(state.dependenciesByCourse[payload.to_course_id] || []), response.data]
+        }
+      }));
+    }
+  },
+
+  deleteDependency: async (toCourseId, dependencyId) => {
+    const response = await apiClient.delete(`/dependency/delete/${dependencyId}`);
+    if (response.status === 200 || response.status === 204) {
+      set((state) => ({
+        dependenciesByCourse: {
+          ...state.dependenciesByCourse,
+          [toCourseId]: (state.dependenciesByCourse[toCourseId] || []).filter((d) => d.id !== dependencyId)
+        }
+      }));
+    }
+  },
+
+  // ---------------------------------------------------------
   // WEEK CRUD OPERATIONS
   // ---------------------------------------------------------
   
@@ -223,14 +299,11 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
     
     if (!weekToDelete) return;
 
-    // 1. Delete the targeted week
     const response = await apiClient.delete(`/week/delete/${weekId}`);
     
     if (response.status === 200 || response.status === 204) {
-      // 2. Identify all subsequent weeks that need their 'num' decremented
       const weeksToUpdate = currentWeeks.filter(w => w.num > weekToDelete.num);
       
-      // 3. Fire concurrent PATCH requests to update the database ordering
       await Promise.all(weeksToUpdate.map(w => 
         apiClient.patch(`/week/update/${w.id}`, { 
           name: w.name, 
@@ -239,7 +312,6 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
         })
       ));
 
-      // 4. Sycnhronize the UI state to match the new database reality
       set((state) => {
         const filteredWeeks = (state.weeksByCourse[courseId] || []).filter((w) => w.id !== weekId);
         const reorderedWeeks = filteredWeeks
@@ -289,14 +361,11 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
     
     if (!lectureToDelete) return;
 
-    // 1. Delete the targeted lecture
     const response = await apiClient.delete(`/lecture/delete/${lectureId}`);
     
     if (response.status === 200 || response.status === 204) {
-      // 2. Identify all subsequent lectures that need their 'num' decremented
       const lecturesToUpdate = currentLectures.filter(l => l.num > lectureToDelete.num);
       
-      // 3. Fire concurrent PATCH requests to update the database ordering
       await Promise.all(lecturesToUpdate.map(l => 
         apiClient.patch(`/lecture/update/${l.id}`, { 
           name: l.name, 
@@ -305,7 +374,6 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
         })
       ));
 
-      // 4. Synchronize the UI state
       set((state) => {
         const filteredLectures = (state.lecturesByWeek[weekId] || []).filter((l) => l.id !== lectureId);
         const reorderedLectures = filteredLectures
