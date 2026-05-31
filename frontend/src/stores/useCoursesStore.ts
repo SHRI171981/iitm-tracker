@@ -1,7 +1,7 @@
 // src/stores/useCoursesStore.ts
 import { create } from 'zustand';
 import apiClient from '@/api/axios';
-import type { Course, Week, Lecture } from '@/components/courses/types';
+import type { Course, Week, Lecture } from '@/components/course-details-admin/types';
 
 interface CourseStore {
   courses: Course[];
@@ -16,7 +16,6 @@ interface CourseStore {
   fetchingLectures: Record<string, boolean>;
   error: string | null;
   
-  // Existing Actions
   fetchCourses: () => Promise<void>;
   fetchCourseDetails: (courseId: string) => Promise<void>;
   fetchWeeks: (courseId: string) => Promise<void>;
@@ -27,12 +26,10 @@ interface CourseStore {
   updateCourse: (courseId: string, payload: any) => Promise<void>;
   deleteCourse: (courseId: string) => Promise<void>;
   
-  // Week CRUD Actions
   createWeek: (payload: { name: string; num: number; course_id: string }) => Promise<void>;
   updateWeek: (weekId: string, payload: { name: string; num: number; course_id: string }) => Promise<void>;
   deleteWeek: (courseId: string, weekId: string) => Promise<void>;
   
-  // Lecture CRUD Actions
   createLecture: (payload: { name: string; num: number; week_id: string }) => Promise<void>;
   updateLecture: (lectureId: string, payload: { name: string; num: number; week_id: string }) => Promise<void>;
   deleteLecture: (weekId: string, lectureId: string) => Promise<void>;
@@ -221,14 +218,38 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
   },
 
   deleteWeek: async (courseId, weekId) => {
+    const currentWeeks = get().weeksByCourse[courseId] || [];
+    const weekToDelete = currentWeeks.find(w => w.id === weekId);
+    
+    if (!weekToDelete) return;
+
+    // 1. Delete the targeted week
     const response = await apiClient.delete(`/week/delete/${weekId}`);
+    
     if (response.status === 200 || response.status === 204) {
-      set((state) => ({
-        weeksByCourse: {
-          ...state.weeksByCourse,
-          [courseId]: (state.weeksByCourse[courseId] || []).filter((w) => w.id !== weekId)
-        }
-      }));
+      // 2. Identify all subsequent weeks that need their 'num' decremented
+      const weeksToUpdate = currentWeeks.filter(w => w.num > weekToDelete.num);
+      
+      // 3. Fire concurrent PATCH requests to update the database ordering
+      await Promise.all(weeksToUpdate.map(w => 
+        apiClient.patch(`/week/update/${w.id}`, { 
+          name: w.name, 
+          num: w.num - 1, 
+          course_id: courseId 
+        })
+      ));
+
+      // 4. Sycnhronize the UI state to match the new database reality
+      set((state) => {
+        const filteredWeeks = (state.weeksByCourse[courseId] || []).filter((w) => w.id !== weekId);
+        const reorderedWeeks = filteredWeeks
+          .sort((a, b) => a.num - b.num)
+          .map((w, idx) => ({ ...w, num: idx + 1 }));
+          
+        return {
+          weeksByCourse: { ...state.weeksByCourse, [courseId]: reorderedWeeks }
+        };
+      });
     }
   },
 
@@ -263,14 +284,38 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
   },
 
   deleteLecture: async (weekId, lectureId) => {
+    const currentLectures = get().lecturesByWeek[weekId] || [];
+    const lectureToDelete = currentLectures.find(l => l.id === lectureId);
+    
+    if (!lectureToDelete) return;
+
+    // 1. Delete the targeted lecture
     const response = await apiClient.delete(`/lecture/delete/${lectureId}`);
+    
     if (response.status === 200 || response.status === 204) {
-      set((state) => ({
-        lecturesByWeek: {
-          ...state.lecturesByWeek,
-          [weekId]: (state.lecturesByWeek[weekId] || []).filter((l) => l.id !== lectureId)
-        }
-      }));
+      // 2. Identify all subsequent lectures that need their 'num' decremented
+      const lecturesToUpdate = currentLectures.filter(l => l.num > lectureToDelete.num);
+      
+      // 3. Fire concurrent PATCH requests to update the database ordering
+      await Promise.all(lecturesToUpdate.map(l => 
+        apiClient.patch(`/lecture/update/${l.id}`, { 
+          name: l.name, 
+          num: l.num - 1, 
+          week_id: weekId 
+        })
+      ));
+
+      // 4. Synchronize the UI state
+      set((state) => {
+        const filteredLectures = (state.lecturesByWeek[weekId] || []).filter((l) => l.id !== lectureId);
+        const reorderedLectures = filteredLectures
+          .sort((a, b) => a.num - b.num)
+          .map((l, idx) => ({ ...l, num: idx + 1 }));
+          
+        return {
+          lecturesByWeek: { ...state.lecturesByWeek, [weekId]: reorderedLectures }
+        };
+      });
     }
   }
 }));

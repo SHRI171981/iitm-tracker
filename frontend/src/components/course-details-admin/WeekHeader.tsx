@@ -46,7 +46,7 @@ const WeekHeader: React.FC<WeekHeaderProps> = ({ week, isExpanded, onToggleExpan
         await deleteWeek(week.course_id, week.id);
       } catch (error) {
         console.error("Failed to delete week", error);
-        setIsProcessing(false);
+        setIsProcessing(false); // Only toggle off if it fails, success unmounts the component
       }
     }
   };

@@ -44,7 +44,7 @@ const LectureRow: React.FC<LectureRowProps> = ({ lecture, weekNum }) => {
         await deleteLecture(lecture.week_id, lecture.id);
       } catch (error) {
         console.error("Failed to delete lecture", error);
-        setIsProcessing(false);
+        setIsProcessing(false); 
       }
     }
   };
