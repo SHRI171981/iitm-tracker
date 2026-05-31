@@ -1,5 +1,6 @@
 // @/components/course-details-admin/CoursePrerequisites.tsx
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Check, X } from 'lucide-react';
 import { useCourseStore } from '@/stores/useCoursesStore';
 import CourseBadge from '@/components/course-details-admin/CourseBadge';
@@ -7,6 +8,8 @@ import CourseBadge from '@/components/course-details-admin/CourseBadge';
 const EMPTY_ARRAY: any[] = [];
 
 const CoursePrerequisites: React.FC<{ courseId: string }> = ({ courseId }) => {
+  const navigate = useNavigate();
+  
   const fetchDependencies = useCourseStore((state) => state.fetchDependencies);
   const fetchSomeCourses = useCourseStore((state) => state.fetchSomeCourses);
   const fetchCourses = useCourseStore((state) => state.fetchCourses);
@@ -81,6 +84,10 @@ const CoursePrerequisites: React.FC<{ courseId: string }> = ({ courseId }) => {
     setIsDropdownOpen(false);
   };
 
+  const handlePreReqClick = (targetCourseId: string) => {
+    navigate(`/courses/${targetCourseId}`);
+  };
+
   // Filter out the current course and any already added prerequisites, then apply search term
   const filteredAvailableCourses = allCourses
     .filter(c => String(c.id) !== String(courseId) && !dependencies.some(d => String(d.from_course_id) === String(c.id)))
@@ -117,7 +124,12 @@ const CoursePrerequisites: React.FC<{ courseId: string }> = ({ courseId }) => {
                 onDelete={() => handleDelete(dep.id)}
                 disabled={isProcessing || isLoading}
               >
-                <span>
+                <span 
+                  onClick={() => !isLoading && handlePreReqClick(String(prereqCourse.id))}
+                  style={{ cursor: isLoading ? 'default' : 'pointer' }}
+                  onMouseOver={(e) => { if(!isLoading) e.currentTarget.style.textDecoration = 'underline'; }}
+                  onMouseOut={(e) => { e.currentTarget.style.textDecoration = 'none'; }}
+                >
                   <strong style={{ fontWeight: 800 }}>{prereqCourse?.code || 'Loading...'}</strong> 
                   {prereqCourse?.name && <span style={{ fontWeight: 500 }}> - {prereqCourse.name}</span>}
                 </span>
