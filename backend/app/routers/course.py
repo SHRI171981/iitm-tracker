@@ -33,6 +33,14 @@ async def get_course(course_id: UUID, db: Session = Depends(get_db)):
     return _course
 
 
+@router.get("/some", response_model=List[course.CourseBase])
+async def get_courses_by_ids(course_ids: List[UUID], db: Session = Depends(get_db)):
+    courses = db.query(models.Course).filter(models.Course.id.in_(course_ids)).all()
+    for course in courses:
+        course.num_weeks = len(course.weeks)
+    return courses
+
+
 @router.post("/create", response_model=course.CourseBase, status_code=status.HTTP_201_CREATED)
 async def create_course(course_data: course.CourseCreate, db: Session = Depends(get_db)):
     existing_course = db.query(models.Course).filter((models.Course.code == course_data.code) | (models.Course.name == course_data.name)).first()
