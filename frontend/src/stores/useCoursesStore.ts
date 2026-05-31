@@ -1,3 +1,4 @@
+// src/stores/useCoursesStore.ts
 import { create } from 'zustand';
 import apiClient from '@/api/axios';
 import type { Course, Week, Lecture } from '@/components/courses/types';
@@ -20,10 +21,10 @@ interface CourseStore {
   fetchLectures: (weekId: string) => Promise<void>;
   fetchStudentProgress: () => Promise<void>;
   toggleLectureCompletion: (lectureId: string) => Promise<void>;
+  createCourse: (payload: any) => Promise<void>;
 }
 
 export const useCourseStore = create<CourseStore>((set, get) => ({
-  // ... (Keep initial state exactly the same)
   courses: [],
   courseDetails: {},
   weeksByCourse: {},
@@ -38,18 +39,15 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
 
   fetchStudentProgress: async () => {
     if (get().studentProgressFetched) return;
-
     try {
       const studentId = "baf10deb-b014-4519-81c8-f195ad2deeff";
       const response = await apiClient.get(`/progress/student/all/${studentId}`);
-      
       if (response.status === 200) {
         const progressMap: Record<string, boolean> = {};
         response.data.forEach((item: any) => {
           const id = typeof item === 'string' ? item : item.lecture_id;
           if (id) progressMap[id] = true;
         });
-
         set((state) => ({
           completedLectures: { ...state.completedLectures, ...progressMap },
           studentProgressFetched: true
@@ -76,7 +74,6 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
   fetchCourseDetails: async (courseId) => {
     if (get().courseDetails[courseId] || get().fetchingCourse[courseId]) return;
     set((state) => ({ fetchingCourse: { ...state.fetchingCourse, [courseId]: true }, error: null }));
-
     try {
       const response = await apiClient.get(`/course/one/${courseId}`);
       if (response.status === 200) {
@@ -92,39 +89,26 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
 
   fetchWeeks: async (courseId) => {
     if (get().weeksByCourse[courseId] || get().fetchingWeeks[courseId]) return;
-
-    set((state) => ({
-      fetchingWeeks: { ...state.fetchingWeeks, [courseId]: true }
-    }));
-
+    set((state) => ({ fetchingWeeks: { ...state.fetchingWeeks, [courseId]: true } }));
     try {
       const response = await apiClient.get(`/week/all/${courseId}`);
       if (response.status === 200) {
         const fetchedWeeks = response.data;
-        
         set((state) => ({
           weeksByCourse: { ...state.weeksByCourse, [courseId]: fetchedWeeks },
           fetchingWeeks: { ...state.fetchingWeeks, [courseId]: false }
         }));
-
-        // IDEA 2 IMPLEMENTATION: Instantly fetch all lectures for these weeks in the background
         const lecturePromises = fetchedWeeks.map((week: Week) => get().fetchLectures(week.id));
         await Promise.all(lecturePromises);
       }
     } catch (error) {
-      set((state) => ({
-        fetchingWeeks: { ...state.fetchingWeeks, [courseId]: false }
-      }));
+      set((state) => ({ fetchingWeeks: { ...state.fetchingWeeks, [courseId]: false } }));
     }
   },
 
   fetchLectures: async (weekId) => {
     if (get().lecturesByWeek[weekId] || get().fetchingLectures[weekId]) return;
-
-    set((state) => ({
-      fetchingLectures: { ...state.fetchingLectures, [weekId]: true }
-    }));
-
+    set((state) => ({ fetchingLectures: { ...state.fetchingLectures, [weekId]: true } }));
     try {
       const response = await apiClient.get(`/lecture/all/${weekId}`);
       if (response.status === 200) {
@@ -134,24 +118,14 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
         }));
       }
     } catch (error) {
-      set((state) => ({
-        fetchingLectures: { ...state.fetchingLectures, [weekId]: false }
-      }));
+      set((state) => ({ fetchingLectures: { ...state.fetchingLectures, [weekId]: false } }));
     }
   },
 
   toggleLectureCompletion: async (lectureId) => {
     const isCurrentlyCompleted = !!get().completedLectures[lectureId];
-    
-    set((state) => ({
-      completedLectures: { ...state.completedLectures, [lectureId]: !isCurrentlyCompleted }
-    }));
-
-    const payload = {
-      student_id: "baf10deb-b014-4519-81c8-f195ad2deeff",
-      lecture_id: lectureId
-    };
-
+    set((state) => ({ completedLectures: { ...state.completedLectures, [lectureId]: !isCurrentlyCompleted } }));
+    const payload = { student_id: "baf10deb-b014-4519-81c8-f195ad2deeff", lecture_id: lectureId };
     try {
       if (!isCurrentlyCompleted) {
         await apiClient.post('/progress/record', payload);
@@ -160,9 +134,22 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
       }
     } catch (error) {
       console.error("Progress synchronization failed:", error);
-      set((state) => ({
-        completedLectures: { ...state.completedLectures, [lectureId]: isCurrentlyCompleted }
-      }));
+      set((state) => ({ completedLectures: { ...state.completedLectures, [lectureId]: isCurrentlyCompleted } }));
+    }
+  },
+
+  createCourse: async (payload) => {
+    try {
+      const response = await apiClient.post('/course/create', payload);
+      if (response.status === 200 || response.status === 201) {
+        const newCourse = response.data;
+        set((state) => ({
+          courses: [...state.courses, newCourse].sort((a: Course, b: Course) => a.name.localeCompare(b.name))
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to create course", error);
+      throw error; 
     }
   }
 }));

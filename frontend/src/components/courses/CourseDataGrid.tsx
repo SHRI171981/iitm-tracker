@@ -1,8 +1,10 @@
+// src/components/courses/CourseDataGrid.tsx
 import React, { useState, useEffect } from 'react';
 import type { Course } from '@/components/courses/types';
 import { useCourseStore } from '@/stores/useCoursesStore';
 import CourseTableHeader from '@/components/courses/CourseTableHeader';
 import CourseTableRow from '@/components/courses/CourseTableRow';
+import CourseCreate from '@/components/courses/CourseCreate';
 
 const CourseDataGrid: React.FC = () => {
   const courses = useCourseStore((state) => state.courses);
@@ -12,6 +14,7 @@ const CourseDataGrid: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState<'All' | Course['level']>('All');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
     fetchCourses();
@@ -43,16 +46,20 @@ const CourseDataGrid: React.FC = () => {
   }
 
   return (
-    <div style={{ width: '100%', maxWidth: '1500px', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', padding: '32px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+    <div style={{ width: '100%', maxWidth: '1500px', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', padding: '32px', position: 'relative' }}>
+      
+      {/* Header section with search, filters, and add button */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', gap: '16px', flexWrap: 'wrap' }}>
+        
         <input
           type="text"
           placeholder="Search on name/code"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ width: '100%', maxWidth: '600px', padding: '12px 16px', border: '1px solid #cbd5e0', borderRadius: '8px', fontSize: '1rem', outline: 'none' }}
+          style={{ flex: '1 1 300px', maxWidth: '600px', padding: '12px 16px', border: '1px solid #cbd5e0', borderRadius: '8px', fontSize: '1rem', outline: 'none' }}
         />
-        <div style={{ position: 'relative' }}>
+        
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <select
             value={levelFilter}
             onChange={(e) => setLevelFilter(e.target.value as any)}
@@ -62,7 +69,17 @@ const CourseDataGrid: React.FC = () => {
               <option key={level} value={level}>{level}</option>
             ))}
           </select>
+
+          <button 
+            onClick={() => setIsCreateModalOpen(true)}
+            style={{ padding: '12px 24px', backgroundColor: '#4f46e5', color: 'white', border: 'none', borderRadius: '8px', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer', transition: 'background-color 0.2s' }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4338ca'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4f46e5'}
+          >
+            + Add Course
+          </button>
         </div>
+
       </div>
 
       <div style={{ width: '100%', overflowX: 'auto' }}>
@@ -80,6 +97,10 @@ const CourseDataGrid: React.FC = () => {
           </p>
         )}
       </div>
+
+      {isCreateModalOpen && (
+        <CourseCreate onClose={() => setIsCreateModalOpen(false)} />
+      )}
     </div>
   );
 };
