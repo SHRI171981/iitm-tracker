@@ -31,7 +31,7 @@ const WeekItem: React.FC<WeekItemProps> = ({ week }) => {
   const progress = getProgress();
 
   return (
-    <div className="border border-slate-200 rounded-lg bg-white overflow-hidden shadow-sm flex flex-col h-full min-h-16">
+    <div className="border border-slate-200 rounded-lg bg-white overflow-hidden shadow-sm flex flex-col min-h-16">
       <div 
         className="flex flex-col p-3 cursor-pointer hover:bg-slate-50 transition-colors"
         onClick={handleToggleExpand}
@@ -55,7 +55,7 @@ const WeekItem: React.FC<WeekItemProps> = ({ week }) => {
       </div>
 
       {isExpanded && (
-        <div className="bg-slate-50/50 border-t border-slate-100 flex-1 overflow-y-auto max-h-60">
+        <div className="bg-slate-50/50 border-t border-slate-100 overflow-y-auto max-h-60">
           {!lectures ? (
             <div className="p-3 text-center text-xs text-slate-400">Loading...</div>
           ) : lectures.length === 0 ? (

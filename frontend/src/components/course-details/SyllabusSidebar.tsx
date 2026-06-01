@@ -14,7 +14,7 @@ const SyllabusSidebar: React.FC<SyllabusSidebarProps> = ({ weeks }) => {
       </div>
       
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {weeks.length === 0 ? (
+        {!weeks || weeks.length === 0 ? (
           <p className="text-center text-sm text-slate-400 py-10">No weeks available.</p>
         ) : (
           weeks.map((week) => (
