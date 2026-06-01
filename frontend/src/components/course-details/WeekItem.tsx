@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, CheckSquare, Square } from 'lucide-react';
 import type { Week } from '@/components/courses/types';
 import { useCourseStore } from '@/stores/useCourseStore';
 import LectureItem from '@/components/course-details/LectureItem';
@@ -14,6 +14,7 @@ const WeekItem: React.FC<WeekItemProps> = ({ week }) => {
   const fetchLectures = useCourseStore((state) => state.fetchLectures);
   const lectures = useCourseStore((state) => state.lecturesByWeek[week.id]);
   const completedLectures = useCourseStore((state) => state.completedLectures);
+  const toggleLectureCompletion = useCourseStore((state) => state.toggleLectureCompletion);
 
   const handleToggleExpand = () => {
     setIsExpanded(!isExpanded);
@@ -30,6 +31,32 @@ const WeekItem: React.FC<WeekItemProps> = ({ week }) => {
 
   const progress = getProgress();
 
+  const handleToggleWeek = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    // Ensure lectures are fetched before attempting to toggle all
+    if (!lectures) {
+      await fetchLectures(week.id);
+    }
+    
+    // Retrieve lectures again in case they were just fetched
+    const currentLectures = useCourseStore.getState().lecturesByWeek[week.id];
+    if (!currentLectures || currentLectures.length === 0) return;
+
+    const allCompleted = currentLectures.every(l => completedLectures[l.id]);
+
+    const togglePromises = currentLectures.map(lecture => {
+      const isCurrentlyCompleted = !!completedLectures[lecture.id];
+      // Only toggle if the target state differs from the current state
+      if ((allCompleted && isCurrentlyCompleted) || (!allCompleted && !isCurrentlyCompleted)) {
+        return toggleLectureCompletion(lecture.id);
+      }
+      return Promise.resolve();
+    });
+
+    await Promise.all(togglePromises);
+  };
+
   return (
     <div className="border border-slate-200 rounded-lg bg-white overflow-hidden shadow-sm flex flex-col min-h-16">
       <div 
@@ -43,7 +70,20 @@ const WeekItem: React.FC<WeekItemProps> = ({ week }) => {
               WEEK {week.num}: {week.name}
             </span>
           </div>
-          <span className="text-xs font-bold text-green-600">{progress}%</span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-bold text-green-600">{progress}%</span>
+            <button 
+              onClick={handleToggleWeek}
+              className="focus:outline-none transition-transform hover:scale-110 shrink-0 flex items-center justify-center"
+              title={progress === 100 ? "Mark week as incomplete" : "Mark week as complete"}
+            >
+              {progress === 100 ? (
+                <CheckSquare className="text-green-500" size={18} />
+              ) : (
+                <Square className="text-slate-300 hover:text-slate-400" size={18} />
+              )}
+            </button>
+          </div>
         </div>
         
         <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden shrink-0">
