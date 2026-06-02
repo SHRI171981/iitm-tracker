@@ -33,6 +33,8 @@ class Course(Base):
     num_hours = Column(Integer, nullable=True)
     website = Column(String(255), nullable=True)
     playlist = Column(String(255), nullable=True)
+
+    num_weeks = Column(Integer, nullable=True) # Stored in DB for performance, updated whenever weeks are added/removed
     
     weeks = relationship("Week", back_populates="course", cascade="all, delete-orphan")
     dependencies_from = relationship("Dependency", foreign_keys="[Dependency.from_course_id]", back_populates="from_course", cascade="all, delete-orphan")
