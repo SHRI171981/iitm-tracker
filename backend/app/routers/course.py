@@ -19,8 +19,6 @@ router = APIRouter(
 @router.get("/all", response_model=List[course.CourseBase])
 async def get_courses(db: Session = Depends(get_db)):
     courses = db.query(models.Course).all()
-    for course in courses:
-        course.num_weeks = len(course.weeks)
     return courses
 
 
@@ -29,15 +27,12 @@ async def get_course(course_id: UUID, db: Session = Depends(get_db)):
     _course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if not _course:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
-    _course.num_weeks = len(_course.weeks)
     return _course
 
 
 @router.post("/some", response_model=List[course.CourseBase])
 async def get_courses_by_ids(course_ids: List[UUID], db: Session = Depends(get_db)):
     courses = db.query(models.Course).filter(models.Course.id.in_(course_ids)).all()
-    for course in courses:
-        course.num_weeks = len(course.weeks)
     return courses
 
 
@@ -54,7 +49,6 @@ async def create_course(course_data: course.CourseCreate, db: Session = Depends(
         db.add(new_course)
         db.commit()
         db.refresh(new_course)
-        new_course.num_weeks = len(new_course.weeks)
         return new_course
     except Exception as e:
         db.rollback()
@@ -77,7 +71,6 @@ async def update_course(course_id: UUID, course_data: course.CourseCreate, db: S
         _course.num_hours = await calculate_total_hours(course_data.playlist) if course_data.playlist else None
         db.commit()
         db.refresh(_course)
-        _course.num_weeks = len(_course.weeks)
         return _course
     except Exception as e:
         db.rollback()

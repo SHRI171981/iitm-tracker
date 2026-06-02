@@ -24,8 +24,8 @@ class CourseBase(BaseModel):
         description="Number of credits for the course",
         ge=0
     )
-    num_weeks: int = Field(
-        ...,
+    num_weeks: Optional[int] = Field(
+        None,
         description="Number of weeks in the course",
         ge=0
     )

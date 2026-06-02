@@ -37,6 +37,7 @@ async def create_week(week_data: week.WeekCreate, db: Session = Depends(get_db))
     try:
         new_week = models.Week(name=week_data.name, num=week_data.num, course_id=week_data.course_id)
         db.add(new_week)
+        _course.num_weeks = _course.num_weeks + 1 if _course.num_weeks is not None else 1  # Increment num_weeks for the course
         db.commit()
         db.refresh(new_week)
         
@@ -77,6 +78,9 @@ async def delete_week(week_id: UUID, db: Session = Depends(get_db)):
     
     try:
         db.delete(_week)
+        _course = db.query(models.Course).filter(models.Course.id == _week.course_id).first()
+        if _course:
+            _course.num_weeks = (_course.num_weeks or 0) - 1  # Decrement num_weeks for the course
         db.commit()
     except Exception as e:
         db.rollback()
