@@ -2,7 +2,6 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useCourseStore } from '@/stores/useCourseStore';
 import apiClient from '@/api/axios';
 import type { Course } from '@/components/course-details-admin/types';
-// If DependencyResponse is defined in types, import it. Otherwise, defined locally.
 
 // ==========================================
 // Type Definitions
@@ -10,13 +9,13 @@ import type { Course } from '@/components/course-details-admin/types';
 
 export interface DependencyResponse {
   id: string;
-  from_course_id: string; // The course that has the dependency (Dependent)
-  to_course_id: string;   // The course that is depended on (Prerequisite)
+  from_course_id: string; // Dependent (Child)
+  to_course_id: string;   // Prerequisite (Parent)
 }
 
 interface CourseEdge {
-  source: string; // Prerequisite
-  target: string; // Dependent
+  source: string; // Prerequisite (Top)
+  target: string; // Dependent (Bottom)
 }
 
 interface RenderNode extends Course {
@@ -25,43 +24,32 @@ interface RenderNode extends Course {
 }
 
 // ==========================================
-// Utility: Deterministic Randomness
+// Utility: Tier Parsing
 // ==========================================
 
-/**
- * Generates a consistent pseudo-random number based on a string seed.
- * Ensures nodes maintain stable positions across React re-renders.
- */
-const getSeededRandom = (seed: string, offset: number = 0): number => {
-  let hash = 0;
-  const target = seed + offset.toString();
-  for (let i = 0; i < target.length; i++) {
-    hash = (hash << 5) - hash + target.charCodeAt(i);
-    hash |= 0;
-  }
-  const x = Math.sin(hash) * 10000;
-  return x - Math.floor(x);
+const getTierLevel = (level: string): number => {
+  const normalized = String(level || '').toLowerCase();
+  if (normalized.includes('foundation')) return 0;
+  if (normalized.includes('diploma')) return 1;
+  if (normalized.includes('degree')) return 2;
+  return 3; // Fallback
 };
 
 // ==========================================
-// Topological Layout Engine
+// Strict Swimlane Layout Engine
 // ==========================================
 
-/**
- * Calculates absolute pixel coordinates for nodes based on topological depth.
- * Dynamically handles orphaned nodes (courses with no dependencies) by assigning them to depth 0.
- */
 const calculateLayout = (nodes: Course[], edges: CourseEdge[]) => {
-  if (!nodes || nodes.length === 0) return { layoutedNodes: [], totalHeight: 0 };
+  if (!nodes || nodes.length === 0) return { layoutedNodes: [], totalHeight: 0, sectionStarts: {} };
 
   const nodeDepths = new Map<string, number>();
 
+  // 1. Calculate Absolute Topological Depth
   const getDepth = (id: string): number => {
     if (nodeDepths.has(id)) return nodeDepths.get(id)!;
     
     const prereqs = edges.filter(e => e.target === id).map(e => e.source);
     
-    // Nodes with zero prerequisites default to the top tier (Depth 0)
     if (prereqs.length === 0) {
       nodeDepths.set(id, 0);
       return 0;
@@ -72,64 +60,68 @@ const calculateLayout = (nodes: Course[], edges: CourseEdge[]) => {
     return depth;
   };
 
-  // Compute depths for all nodes
   nodes.forEach(n => getDepth(String(n.id)));
 
-  // Group nodes by their calculated depth
-  const depthGroups = new Map<number, Course[]>();
+  // 2. Group Nodes by Explicit Tiers (Foundation -> Diploma -> Degree)
+  const tierGroups: Record<number, Course[]> = { 0: [], 1: [], 2: [] };
+  
   nodes.forEach(n => {
-    const d = nodeDepths.get(String(n.id)) || 0;
-    if (!depthGroups.has(d)) depthGroups.set(d, []);
-    depthGroups.get(d)!.push(n);
+    const tier = getTierLevel(n.level);
+    if (tierGroups[tier]) tierGroups[tier].push(n);
   });
 
   const layoutedNodes: RenderNode[] = [];
-  const maxDepth = Math.max(0, ...Array.from(nodeDepths.values()));
+  const containerWidth = 1200; // Base reference width for centering
+  const rowSpacing = 140;      // Vertical space between rows
+  const tierSpacing = 180;     // Extra vertical space between distinct tiers
+  const nodeSpacing = 180;     // Horizontal space between nodes
   
-  // Layout Constants
-  const containerWidth = 1200;
-  const safeStartX = 150;
-  const usableWidth = containerWidth - (safeStartX * 2);
   let currentY = 120;
+  const sectionStarts: Record<string, { start: number, end: number }> = {};
 
-  for (let d = 0; d <= maxDepth; d++) {
-    const group = depthGroups.get(d) || [];
-    if (group.length === 0) continue;
+  // 3. Process Each Tier Sequentially (Strict Top-to-Bottom Order)
+  [0, 1, 2].forEach(tierIndex => {
+    const tierNodes = tierGroups[tierIndex];
+    if (tierNodes.length === 0) return;
 
-    // Sort to ensure stable rendering order within rows
-    const sortedGroup = [...group].sort((a, b) => String(a.id).localeCompare(String(b.id)));
+    const tierKey = tierIndex === 0 ? 'foundation' : tierIndex === 1 ? 'diploma' : 'degree';
+    const tierStartY = currentY;
 
-    let index = 0;
-    while (index < sortedGroup.length) {
-      // Chunk nodes into sub-rows of 2 to 4 items
-      const rowSizeSeed = getSeededRandom(`row-${d}-${index}`);
-      const rowSize = Math.floor(rowSizeSeed * 3) + 2; 
-      const chunk = sortedGroup.slice(index, index + rowSize);
+    // Group nodes within this tier by their calculated depth
+    const depthGroups = new Map<number, Course[]>();
+    tierNodes.forEach(n => {
+      const d = nodeDepths.get(String(n.id)) || 0;
+      if (!depthGroups.has(d)) depthGroups.set(d, []);
+      depthGroups.get(d)!.push(n);
+    });
 
-      const segmentWidth = usableWidth / chunk.length;
+    // Sort the depths to process rows strictly from top to bottom
+    const sortedDepths = Array.from(depthGroups.keys()).sort((a, b) => a - b);
 
-      chunk.forEach((node, idx) => {
-        const nodeId = String(node.id);
-        const baseX = safeStartX + (idx * segmentWidth) + (segmentWidth / 2);
-        
-        // Apply bounded jitter to prevent rigid grid appearance
-        const jitterX = (getSeededRandom(nodeId, 1) - 0.5) * (segmentWidth * 0.5);
-        const jitterY = (getSeededRandom(nodeId, 2) - 0.5) * 50; 
+    sortedDepths.forEach(depth => {
+      // Sort alphabetically for stable, predictable rendering
+      const rowNodes = depthGroups.get(depth)!.sort((a, b) => String(a.id).localeCompare(String(b.id)));
+      
+      // Center the row horizontally
+      const totalRowWidth = (rowNodes.length - 1) * nodeSpacing;
+      const startX = (containerWidth / 2) - (totalRowWidth / 2);
 
+      rowNodes.forEach((node, idx) => {
         layoutedNodes.push({
           ...node,
-          x: baseX + jitterX,
-          y: currentY + jitterY,
+          x: startX + (idx * nodeSpacing),
+          y: currentY,
         });
       });
 
-      currentY += 130; 
-      index += rowSize;
-    }
-    currentY += 40; // Spacing between depth layers
-  }
+      currentY += rowSpacing; // Move down for the next row of dependencies
+    });
 
-  return { layoutedNodes, totalHeight: currentY + 100 };
+    sectionStarts[tierKey] = { start: tierStartY - 60, end: currentY };
+    currentY += tierSpacing; // Add visual gap before the next Tier begins
+  });
+
+  return { layoutedNodes, totalHeight: currentY, sectionStarts };
 };
 
 // ==========================================
@@ -137,13 +129,11 @@ const calculateLayout = (nodes: Course[], edges: CourseEdge[]) => {
 // ==========================================
 
 const ProgressView: React.FC = () => {
-  // Global Store State
-  const courses = useCourseStore((state) => state.courses);
+  const courses = useCourseStore((state) => state.courses || []);
   const fetchCourses = useCourseStore((state) => state.fetchCourses);
   const isCoursesLoading = useCourseStore((state) => state.loading);
   const storeError = useCourseStore((state) => state.error);
   
-  // Local State for Dependencies
   const [dependencies, setDependencies] = useState<CourseEdge[]>([]);
   const [isDependenciesLoading, setIsDependenciesLoading] = useState<boolean>(true);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -153,16 +143,16 @@ const ProgressView: React.FC = () => {
 
     const initializeData = async () => {
       try {
-        // Trigger course fetch if the store is empty
         fetchCourses();
 
-        // Fetch dependencies using the configured axios instance
         const response = await apiClient.get('/dependency/all');
         
         if (isMounted && response.status === 200) {
+          // to_course_id = Prerequisite (Source)
+          // from_course_id = Dependent (Target)
           const mappedEdges: CourseEdge[] = response.data.map((dep: DependencyResponse) => ({
-            source: String(dep.to_course_id), // to_course_id is the prerequisite
-            target: String(dep.from_course_id) // from_course_id is the dependent
+            source: String(dep.to_course_id), 
+            target: String(dep.from_course_id)
           }));
           setDependencies(mappedEdges);
         }
@@ -171,41 +161,23 @@ const ProgressView: React.FC = () => {
           setLocalError(err.response?.data?.message || 'Failed to fetch curriculum dependencies');
         }
       } finally {
-        if (isMounted) {
-          setIsDependenciesLoading(false);
-        }
+        if (isMounted) setIsDependenciesLoading(false);
       }
     };
 
     initializeData();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [fetchCourses]);
 
-  // Execute topological sorting algorithm only when raw data changes
-  const { layoutedNodes, totalHeight } = useMemo(() => 
+  const { layoutedNodes, totalHeight, sectionStarts } = useMemo(() => 
     calculateLayout(courses, dependencies), 
   [courses, dependencies]);
 
-  /**
-   * Maps course level strings to corresponding Tailwind color classes.
-   * Handles string normalization to prevent exact-match casing issues.
-   */
   const getLevelColor = (level: string) => {
-    const normalizedLevel = String(level || '').toLowerCase();
-    
-    if (normalizedLevel.includes('foundation')) {
-      return 'bg-purple-100 border-purple-400 text-purple-700 shadow-[0_0_15px_rgba(168,85,247,0.2)]';
-    }
-    if (normalizedLevel.includes('diploma')) {
-      return 'bg-blue-100 border-blue-400 text-blue-700 shadow-[0_0_15px_rgba(59,130,246,0.2)]';
-    }
-    if (normalizedLevel.includes('degree')) {
-      return 'bg-emerald-100 border-emerald-400 text-emerald-700 shadow-[0_0_15px_rgba(16,185,129,0.2)]';
-    }
-    
+    const normalized = String(level || '').toLowerCase();
+    if (normalized.includes('foundation')) return 'bg-purple-100 border-purple-400 text-purple-700 shadow-[0_0_15px_rgba(168,85,247,0.3)]';
+    if (normalized.includes('diploma')) return 'bg-blue-100 border-blue-400 text-blue-700 shadow-[0_0_15px_rgba(59,130,246,0.3)]';
+    if (normalized.includes('degree')) return 'bg-emerald-100 border-emerald-400 text-emerald-700 shadow-[0_0_15px_rgba(16,185,129,0.3)]';
     return 'bg-slate-100 border-slate-300 text-slate-600';
   };
 
@@ -214,9 +186,9 @@ const ProgressView: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
+      <div className="min-h-screen w-full bg-slate-50 flex items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-3 text-slate-400">
-          <div className="w-6 h-6 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin" />
           <div className="text-sm font-bold uppercase tracking-widest">Mapping Curriculum...</div>
         </div>
       </div>
@@ -225,31 +197,52 @@ const ProgressView: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
-        <div className="text-sm font-bold text-red-400 uppercase tracking-widest">Error: {error}</div>
+      <div className="min-h-screen w-full bg-slate-50 flex items-center justify-center font-sans">
+        <div className="text-sm font-bold text-red-500 uppercase tracking-widest bg-red-50 px-6 py-3 rounded-lg border border-red-200">
+          Error: {error}
+        </div>
       </div>
     );
   }
 
   return (
-    <div 
-      className="relative w-full bg-[#f8fafc] overflow-x-auto overflow-y-auto font-sans" 
-      style={{ height: `${Math.max(totalHeight, 1000)}px` }}
-    >
-      <div className="relative min-w-[1200px] w-[1200px] mx-auto h-full">
+    <div className="relative w-full min-h-screen bg-[#f8fafc] overflow-x-auto overflow-y-auto font-sans flex justify-center">
+      <div 
+        className="relative min-w-[1200px] w-[1200px] bg-white shadow-2xl rounded-2xl mx-8 my-8 border border-slate-200/60 overflow-hidden"
+        style={{ height: `${Math.max(totalHeight, 800)}px` }}
+      >
         
-        {/* SVG Render Layer: Bezier curves for inter-node routing */}
+        {/* Tier Background Dividers and Labels */}
+        {Object.entries(sectionStarts).map(([tier, bounds]) => (
+          bounds && (
+            <div key={tier} className="absolute w-full pointer-events-none" style={{ top: `${bounds.start}px`, height: `${bounds.end - bounds.start}px` }}>
+              <div className="absolute inset-0 bg-slate-50/50 border-y border-slate-100" />
+              <div className="absolute left-8 top-12 text-slate-200/50 text-8xl font-black uppercase tracking-widest origin-top-left -rotate-90 opacity-40">
+                {tier}
+              </div>
+            </div>
+          )
+        ))}
+
+        {/* Directed SVG Render Layer */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
+          <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8" />
+            </marker>
+          </defs>
+          
           {dependencies.map((edge, index) => {
             const sourceNode = layoutedNodes.find(n => String(n.id) === edge.source);
             const targetNode = layoutedNodes.find(n => String(n.id) === edge.target);
             if (!sourceNode || !targetNode) return null;
 
-            // Generate cubic bezier path forcing vertical entry/exit points
-            const d = `M ${sourceNode.x} ${sourceNode.y} 
-                       C ${sourceNode.x} ${sourceNode.y + 60}, 
-                         ${targetNode.x} ${targetNode.y - 60}, 
-                         ${targetNode.x} ${targetNode.y}`;
+            // Offset the connection points slightly so the lines end exactly at the edge of the circular node
+            const nodeRadius = 32;
+            const d = `M ${sourceNode.x} ${sourceNode.y + nodeRadius} 
+                       C ${sourceNode.x} ${sourceNode.y + nodeRadius + 50}, 
+                         ${targetNode.x} ${targetNode.y - nodeRadius - 50}, 
+                         ${targetNode.x} ${targetNode.y - nodeRadius - 4}`;
 
             return (
               <path
@@ -258,28 +251,33 @@ const ProgressView: React.FC = () => {
                 fill="none"
                 stroke="#cbd5e1"
                 strokeWidth="3"
-                strokeLinecap="round"
-                className="opacity-70 transition-colors duration-500 hover:opacity-100 hover:stroke-slate-500"
+                markerEnd="url(#arrowhead)"
+                className="opacity-80 transition-colors duration-500 hover:opacity-100 hover:stroke-indigo-400"
               />
             );
           })}
         </svg>
 
-        {/* HTML Render Layer: Interactive course nodes */}
+        {/* HTML Node Render Layer */}
         {layoutedNodes.map((node) => (
           <div
             key={String(node.id)}
             style={{ left: `${node.x}px`, top: `${node.y}px` }}
             className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center cursor-pointer group z-10"
           >
-            <div className={`w-14 h-14 rounded-full border-[3px] flex items-center justify-center transition-all duration-300 hover:scale-125 ${getLevelColor(node.level)}`}>
-              <span className="font-bold text-xs">{node.code}</span>
+            {/* The Main Node Circle */}
+            <div className={`w-16 h-16 rounded-full border-[3px] flex items-center justify-center transition-transform duration-300 group-hover:scale-110 bg-white z-10 ${getLevelColor(node.level)}`}>
+              <span className="font-extrabold text-sm">{node.code}</span>
             </div>
             
-            {/* Context Tooltip */}
-            <div className="absolute top-[110%] mt-2 px-3 py-2 bg-slate-800 backdrop-blur-md border border-slate-700 text-white rounded-md shadow-xl opacity-0 group-hover:opacity-100 group-hover:-translate-y-1 transition-all pointer-events-none whitespace-nowrap z-20 flex flex-col items-center">
-              <span className="text-xs font-bold">{node.name}</span>
-              <span className="text-[10px] text-slate-400 font-mono mt-0.5 uppercase tracking-wider">{node.level}</span>
+            {/* Context Tooltip & Quick Info */}
+            <div className="absolute top-[100%] mt-3 px-4 py-2.5 bg-slate-800 backdrop-blur-md border border-slate-700 text-white rounded-lg shadow-2xl opacity-0 group-hover:opacity-100 group-hover:-translate-y-1 transition-all pointer-events-none whitespace-nowrap z-20 flex flex-col items-center min-w-[140px]">
+              <span className="text-sm font-bold text-white mb-0.5">{node.name}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-slate-400 font-mono uppercase tracking-wider">{node.level}</span>
+                <span className="w-1 h-1 rounded-full bg-slate-600" />
+                <span className="text-[10px] text-indigo-300 font-bold">{node.credits} CR</span>
+              </div>
             </div>
           </div>
         ))}

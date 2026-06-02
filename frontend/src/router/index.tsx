@@ -26,7 +26,7 @@ const router = createBrowserRouter([
             path: 'courses', 
             children: [
               { index: true, element: <CourseView /> },
-              { path: ':id', element: <CourseDetailsView /> }
+              { path: ':id', element: <CourseDetailsAdminView /> }
             ]
           },
           { path: 'progress', element: <ProgressView /> },
