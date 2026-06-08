@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
 from collections import defaultdict
-from helpers.security import get_password_hash, verify_password
+from helpers.security import require_roles
 from app import models
 from app.database import get_db
 from app.schemas import week
@@ -14,13 +14,13 @@ router = APIRouter(
 )
 
 
-@router.get("/all/{course_id}", response_model=List[week.WeekBase])
+@router.get("/all/{course_id}", response_model=List[week.WeekBase], dependencies=[Depends(require_roles(["admin", "student"]))])
 async def get_weeks(course_id: UUID, db: Session = Depends(get_db)):
     weeks = db.query(models.Week).filter(models.Week.course_id == course_id).all()
     return weeks
 
 
-@router.get("/one/{week_id}", response_model=week.WeekBase)
+@router.get("/one/{week_id}", response_model=week.WeekBase, dependencies=[Depends(require_roles(["admin", "student"]))])
 async def get_week(week_id: UUID, db: Session = Depends(get_db)):
     _week = db.query(models.Week).filter(models.Week.id == week_id).first()
     if not _week:
@@ -28,7 +28,7 @@ async def get_week(week_id: UUID, db: Session = Depends(get_db)):
     return _week
 
 
-@router.post("/create", response_model=week.WeekBase, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=week.WeekBase, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_roles(["admin"]))])
 async def create_week(week_data: week.WeekCreate, db: Session = Depends(get_db)):
     _course = db.query(models.Course).filter(models.Course.id == week_data.course_id).first()
     if not _course:
@@ -47,7 +47,7 @@ async def create_week(week_data: week.WeekCreate, db: Session = Depends(get_db))
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to create week: {str(e)}") from e
     
 
-@router.patch("/update/{week_id}", response_model=week.WeekBase)
+@router.patch("/update/{week_id}", response_model=week.WeekBase, dependencies=[Depends(require_roles(["admin"]))])
 async def update_week(week_id: UUID, week_data: week.WeekCreate, db: Session = Depends(get_db)):
     _week = db.query(models.Week).filter(models.Week.id == week_id).first()
     if not _week:
@@ -70,7 +70,7 @@ async def update_week(week_id: UUID, week_data: week.WeekCreate, db: Session = D
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to update week: {str(e)}") from e
     
 
-@router.delete("/delete/{week_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete/{week_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_roles(["admin"]))])
 async def delete_week(week_id: UUID, db: Session = Depends(get_db)):
     _week = db.query(models.Week).filter(models.Week.id == week_id).first()
     if not _week:
