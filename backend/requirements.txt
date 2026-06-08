@@ -13,3 +13,4 @@ pydantic[email]
 beautifulsoup4
 requests
 httpx
+python-jose[cryptography]
