@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
 from collections import defaultdict
-from helpers.security import get_password_hash, verify_password
+from helpers.security import require_roles
 from app import models
 from app.database import get_db
 from app.schemas import lecture
@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 
-@router.get("/all/{week_id}", response_model=List[lecture.LectureBase])
+@router.get("/all/{week_id}", response_model=List[lecture.LectureBase], dependencies=[Depends(require_roles(["admin", "student"]))])
 async def read_lectures(week_id: UUID, db: Session = Depends(get_db)):
     _week = db.query(models.Week).filter(models.Week.id == week_id).first()
     if _week is None:
@@ -23,7 +23,7 @@ async def read_lectures(week_id: UUID, db: Session = Depends(get_db)):
     return lectures
 
 
-@router.get("/one/{lecture_id}", response_model=lecture.LectureBase)
+@router.get("/one/{lecture_id}", response_model=lecture.LectureBase, dependencies=[Depends(require_roles(["admin", "student"]))])
 async def read_lecture(lecture_id: UUID, db: Session = Depends(get_db)):
     print(lecture_id)
     _lecture = db.query(models.Lecture).filter(models.Lecture.id == lecture_id).first()
@@ -33,7 +33,7 @@ async def read_lecture(lecture_id: UUID, db: Session = Depends(get_db)):
     return _lecture
 
 
-@router.post("/create", response_model=lecture.LectureBase, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=lecture.LectureBase, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_roles(["admin"]))])
 async def create_lecture(lecture: lecture.LectureCreate, db: Session = Depends(get_db)):
     _week = db.query(models.Week).filter(models.Week.id == lecture.week_id).first()
     if _week is None:
@@ -55,7 +55,7 @@ async def create_lecture(lecture: lecture.LectureCreate, db: Session = Depends(g
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.patch("/update/{lecture_id}", response_model=lecture.LectureBase)
+@router.patch("/update/{lecture_id}", response_model=lecture.LectureBase, dependencies=[Depends(require_roles(["admin"]))])
 async def update_lecture(lecture_id: UUID, lecture_data: lecture.LectureCreate, db: Session = Depends(get_db)):
     _lecture = db.query(models.Lecture).filter(models.Lecture.id == lecture_id).first()
     if _lecture is None:
@@ -75,7 +75,7 @@ async def update_lecture(lecture_id: UUID, lecture_data: lecture.LectureCreate, 
         raise HTTPException(status_code=400, detail=str(e))
     
 
-@router.delete("/delete/{lecture_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete/{lecture_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_roles(["admin"]))])
 async def delete_lecture(lecture_id: UUID, db: Session = Depends(get_db)):
     _lecture = db.query(models.Lecture).filter(models.Lecture.id == lecture_id).first()
     if _lecture is None:
