@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
-from helpers.security import get_password_hash, verify_password
+from helpers.security import require_roles
 from helpers.progress import week_completion, course_completion
 from app import models
 from app.database import get_db
@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 
-@router.get("/student/all/{student_id}", response_model=List[progress.ProgressBase])
+@router.get("/student/all/{student_id}", response_model=List[progress.ProgressBase], dependencies=[Depends(require_roles(["admin", "student"]))])
 async def get_progress_by_student(student_id: UUID, db: Session = Depends(get_db)):
     student = db.query(models.Student).filter(models.Student.id == student_id).first()
     if not student:
@@ -24,7 +24,7 @@ async def get_progress_by_student(student_id: UUID, db: Session = Depends(get_db
     return progress_entries
 
 
-@router.get("/week/{student_id}/{week_id}", response_model=progress.WeekProgress)
+@router.get("/week/{student_id}/{week_id}", response_model=progress.WeekProgress, dependencies=[Depends(require_roles(["admin", "student"]))])
 async def get_progress_by_week(week_id: UUID, student_id: UUID, db: Session = Depends(get_db)):
     student = db.query(models.Student).filter(models.Student.id == student_id).first()
     if not student:
@@ -43,7 +43,7 @@ async def get_progress_by_week(week_id: UUID, student_id: UUID, db: Session = De
     )
 
 
-@router.get("/course/{student_id}/{course_id}", response_model=progress.CourseProgress)
+@router.get("/course/{student_id}/{course_id}", response_model=progress.CourseProgress, dependencies=[Depends(require_roles(["admin", "student"]))])
 async def get_progress_by_course(course_id: UUID, student_id: UUID, db: Session = Depends(get_db)):
     course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if not course:
@@ -62,7 +62,7 @@ async def get_progress_by_course(course_id: UUID, student_id: UUID, db: Session 
     )
                                  
 
-@router.post("/record", response_model=progress.ProgressBase)
+@router.post("/record", response_model=progress.ProgressBase, dependencies=[Depends(require_roles(["admin", "student"]))])
 async def record_progress(progress_data: progress.ProgressCreate, db: Session = Depends(get_db)):
     student = db.query(models.Student).filter(models.Student.id == progress_data.student_id).first()
     if not student:
@@ -100,7 +100,7 @@ async def record_progress(progress_data: progress.ProgressCreate, db: Session = 
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to record progress: {str(e)}") from e
 
 
-@router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_roles(["admin", "student"]))])
 async def delete_progress(progress_data: progress.ProgressCreate, db: Session = Depends(get_db)):
     student = db.query(models.Student).filter(models.Student.id == progress_data.student_id).first()
     if not student:
