@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
 from collections import defaultdict
-from helpers.security import get_password_hash, verify_password
+from helpers.security import require_roles
 from app import models
 from app.database import get_db
 from app.schemas import dependency
@@ -15,7 +15,7 @@ router = APIRouter(
 )
 
 
-@router.get("/from/{course_id}", response_model=List[dependency.DependencyBase])
+@router.get("/from/{course_id}", response_model=List[dependency.DependencyBase], dependencies=[Depends(require_roles(["admin", "student"]))])
 async def read_from_dependencies(course_id: UUID, db: Session = Depends(get_db)):
     _course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if _course is None:
@@ -24,7 +24,7 @@ async def read_from_dependencies(course_id: UUID, db: Session = Depends(get_db))
     return dependencies
 
 
-@router.get("/to/{course_id}", response_model=List[dependency.DependencyBase])
+@router.get("/to/{course_id}", response_model=List[dependency.DependencyBase], dependencies=[Depends(require_roles(["admin", "student"]))])
 async def read_to_dependencies(course_id: UUID, db: Session = Depends(get_db)):
     _course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if _course is None:
@@ -33,7 +33,7 @@ async def read_to_dependencies(course_id: UUID, db: Session = Depends(get_db)):
     return dependencies
 
 
-@router.get("/one/{dependency_id}", response_model=dependency.DependencyBase)
+@router.get("/one/{dependency_id}", response_model=dependency.DependencyBase, dependencies=[Depends(require_roles(["admin", "student"]))])
 async def read_dependency(dependency_id: UUID, db: Session = Depends(get_db)):
     _dependency = db.query(models.Dependency).filter(models.Dependency.id == dependency_id).first()
     if _dependency is None:
@@ -41,13 +41,13 @@ async def read_dependency(dependency_id: UUID, db: Session = Depends(get_db)):
     return _dependency
 
 
-@router.get("/all", response_model=List[dependency.DependencyBase])
+@router.get("/all", response_model=List[dependency.DependencyBase], dependencies=[Depends(require_roles(["admin", "student"]))])
 async def read_all_dependencies(db: Session = Depends(get_db)):
     dependencies = db.query(models.Dependency).all()
     return dependencies
 
 
-@router.post("/create", response_model=dependency.DependencyBase, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=dependency.DependencyBase, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_roles(["admin"]))])
 async def create_dependency(dependency: dependency.DependencyCreate, db: Session = Depends(get_db)):
     _from_course = db.query(models.Course).filter(models.Course.id == dependency.from_course_id).first()
     if _from_course is None:
@@ -72,7 +72,7 @@ async def create_dependency(dependency: dependency.DependencyCreate, db: Session
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.delete("/delete/{dependency_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete/{dependency_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_roles(["admin"]))])
 async def delete_dependency(dependency_id: UUID, db: Session = Depends(get_db)):
     _dependency = db.query(models.Dependency).filter(models.Dependency.id == dependency_id).first()
     if _dependency is None:
