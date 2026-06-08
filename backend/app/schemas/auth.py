@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict, Field, EmailStr
 from typing import List, Optional, Dict
 from uuid import UUID
 from datetime import datetime
-
+from config import ACCESS_TOKEN_EXPIRE_MINUTE
 
 class UserEntry(BaseModel):
     username: str = Field(
@@ -58,11 +58,17 @@ class RegisterResponse(BaseModel):
     )
 
 
-class LoginResponse(BaseModel):
+class UserResponse(BaseModel):
     user_id: UUID = Field(
         ...,
-        description="Unique identifier for the authenticated user"
+        description="Unique identifier for the user"
     )
+    role: str = Field(
+        ...,
+        description="Role of the user (e.g., 'admin', 'student')"
+    )
+
+class LoginResponse(BaseModel):
     refresh_token: str = Field(
         ...,
         description="JWT refresh token for obtaining new access tokens"
@@ -74,4 +80,12 @@ class LoginResponse(BaseModel):
     token_type: str = Field(
         "bearer",
         description="Type of the token, typically 'bearer'"
+    )
+    expires_in: int = Field(
+        ACCESS_TOKEN_EXPIRE_MINUTE * 60,
+        description="Expiration time of the access token in seconds"
+    )
+    user: UserResponse = Field(
+        ...,
+        description="Information about the authenticated user"
     )
