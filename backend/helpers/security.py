@@ -7,7 +7,7 @@ from config import SECRET_KEY, HASH_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, REFR
 from fastapi.security import OAuth2PasswordBearer
 from app.schemas.auth import UserResponse
 from fastapi import Depends, HTTPException, status
-
+from typing import List, Callable
 
 # Initialize the password hash context using the Argon2 algorithm.
 # This context handles salt generation and hashing automatically.
@@ -81,7 +81,7 @@ def generate_auth_tokens(user_id: str | int, role: str) -> dict:
     }
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserResponse:
+def get_current_user(token: str = Depends(oauth2_scheme)) -> UserResponse:
     """
     Dependency to validate the incoming JWT access token.
     Extracts the user identity and role, enforcing strict validation checks.
@@ -119,3 +119,20 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserResponse:
     except JWTError:
         # Catches expired tokens, modified payloads, or invalid signatures
         raise credentials_exception
+
+
+def require_roles(allowed_roles: List[str]) -> Callable:
+    """
+    Dependency factory generating a role validation closure.
+    Provides functional equivalent to a callable class.
+    """
+    def role_checker(user: UserResponse = Depends(get_current_user)) -> UserResponse:
+        """Executes request-time role validation."""
+        if user.role not in allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions"
+            )
+        return user
+        
+    return role_checker
