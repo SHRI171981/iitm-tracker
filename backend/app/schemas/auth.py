@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict, Field, EmailStr
 from typing import List, Optional, Dict
 from uuid import UUID
 from datetime import datetime
-from config import ACCESS_TOKEN_EXPIRE_MINUTE
+from config import ACCESS_TOKEN_EXPIRE_MINUTES
 
 class UserEntry(BaseModel):
     username: str = Field(
@@ -82,7 +82,7 @@ class LoginResponse(BaseModel):
         description="Type of the token, typically 'bearer'"
     )
     expires_in: int = Field(
-        ACCESS_TOKEN_EXPIRE_MINUTE * 60,
+        ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         description="Expiration time of the access token in seconds"
     )
     user: UserResponse = Field(
