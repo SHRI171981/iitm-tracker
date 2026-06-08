@@ -66,7 +66,7 @@ def generate_auth_tokens(user_id: str | int, role: str) -> dict:
         "token_type": "bearer",
         "expires_in": int(access_delta.total_seconds()),
         "user": {
-            "id": str(user_id),
+            "user_id": str(user_id),
             "role": role
         }
     }
