@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
 from collections import defaultdict
-from helpers.security import get_password_hash, verify_password
+from helpers.security import get_password_hash, verify_password, generate_auth_tokens
 from app import models
 from app.database import get_db
 from app.schemas import auth
@@ -83,13 +83,7 @@ async def login_user(user: auth.UserEntry, db: Session = Depends(get_db)):
     if not db_user or not verify_password(user.password, db_user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
     
-    # Token generation logic (not shown here)
-    access_token = "generated_access_token"  # Placeholder
-    refresh_token = "generated_refresh_token"  # Placeholder
+    user_role = "admin" if db_user.is_admin else "student"
+    login_response = generate_auth_tokens(db_user.id, user_role)
     
-    return auth.LoginResponse(
-        user_id=db_user.id,
-        refresh_token=refresh_token,
-        access_token=access_token,
-        token_type="bearer"
-    )
+    return auth.LoginResponse.model_validate(login_response)
