@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
 from collections import defaultdict
-from helpers.security import get_password_hash, verify_password, generate_auth_tokens
+from helpers.security import get_password_hash, verify_password, generate_auth_tokens, require_roles
 from app import models
 from app.database import get_db
 from app.schemas import auth
@@ -14,14 +14,14 @@ router = APIRouter(
 )
 
 
-@router.get("/users", response_model=List[auth.RegisterResponse], status_code=status.HTTP_200_OK)
+@router.get("/users", response_model=List[auth.RegisterResponse], status_code=status.HTTP_200_OK, dependencies=[Depends(require_roles(["admin"]))])
 async def list_users(db: Session = Depends(get_db)):
     """Retrieves a list of all registered users."""
     users = db.query(models.User).all()
     return [auth.RegisterResponse(id=user.id, username=user.username, student_id=user.student.id, name=user.student.name, email=user.student.email, is_admin=user.is_admin) for user in users]
 
 
-@router.get("/users/{user_id}", response_model=auth.RegisterResponse, status_code=status.HTTP_200_OK)
+@router.get("/users/{user_id}", response_model=auth.RegisterResponse, status_code=status.HTTP_200_OK, dependencies=[Depends(require_roles(["admin", "student"]))])
 async def get_user(user_id: UUID, db: Session = Depends(get_db)):
     """Retrieves details of a specific user by their unique identifier."""
     user = db.query(models.User).filter(models.User.id == user_id).first()
