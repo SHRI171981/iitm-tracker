@@ -45,8 +45,7 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
   fetchStudentProgress: async () => {
     if (get().studentProgressFetched) return;
     try {
-      const studentId = "baf10deb-b014-4519-81c8-f195ad2deeff";
-      const response = await apiClient.get(`/progress/student/all/${studentId}`);
+      const response = await apiClient.get(`/progress/student/me`);
       if (response.status === 200) {
         const progressMap: Record<string, boolean> = {};
         response.data.forEach((item: any) => {
@@ -169,12 +168,12 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
   toggleLectureCompletion: async (lectureId) => {
     const isCurrentlyCompleted = !!get().completedLectures[lectureId];
     set((state) => ({ completedLectures: { ...state.completedLectures, [lectureId]: !isCurrentlyCompleted } }));
-    const payload = { student_id: "baf10deb-b014-4519-81c8-f195ad2deeff", lecture_id: lectureId };
+    const payload = { lecture_id: lectureId };
     try {
       if (!isCurrentlyCompleted) {
-        await apiClient.post('/progress/record', payload);
+        await apiClient.post('/progress/record/me', payload);
       } else {
-        await apiClient.delete('/progress/delete', { data: payload });
+        await apiClient.delete('/progress/delete/me', { data: payload });
       }
     } catch (error) {
       set((state) => ({ completedLectures: { ...state.completedLectures, [lectureId]: isCurrentlyCompleted } }));
