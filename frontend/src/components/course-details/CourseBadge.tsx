@@ -32,28 +32,6 @@ const CourseBadge: React.FC<CourseBadgeProps> = ({ children, bgColor, borderColo
       }}
     >
       {children}
-      {onDelete && (
-        <button 
-          onClick={onDelete}
-          style={{ 
-            background: 'none', 
-            border: 'none', 
-            color: textColor, 
-            cursor: 'pointer', 
-            padding: '2px', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            borderRadius: '50%',
-            marginLeft: '2px'
-          }}
-          onMouseOver={(e) => { e.currentTarget.style.opacity = '0.6'; }}
-          onMouseOut={(e) => { e.currentTarget.style.opacity = '1'; }}
-          title="Remove"
-        >
-          <X size={14} strokeWidth={2.5} />
-        </button>
-      )}
     </div>
   );
 };

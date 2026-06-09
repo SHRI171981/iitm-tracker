@@ -1,8 +1,8 @@
 // @/components/course-details-admin/CourseHeader.tsx
 import React from 'react';
-import type { Course } from '@/components/course-details-admin/types';
-import CourseBadge from '@/components/course-details-admin/CourseBadge';
-import CoursePrerequisites from '@/components/course-details-admin/CoursePrerequisites';
+import type { Course } from '@/components/course-details/types';
+import CourseBadge from '@/components/course-details/CourseBadge';
+import CoursePrerequisites from '@/components/course-details/CoursePrerequisites';
 
 interface CourseHeaderProps {
   course: Course;
