@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link, Play, Edit, Trash2 } from 'lucide-react';
 import type { Course } from '@/components/courses/types';
 import CourseCreate from '@/components/courses/CourseCreate';
 import { useCourseAdminStore } from '@/stores/useCourseAdminStore';
+import { AuthContext } from '@/contexts/AuthContext';
 
 interface CourseTableRowProps {
   course: Course;
@@ -15,8 +16,15 @@ const CourseTableRow: React.FC<CourseTableRowProps> = ({ course }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const auth = useContext(AuthContext);
+  const isAdmin = auth?.user?.role === 'admin';
+
   const handleRowClick = () => {
-    navigate(`/courses/${course.id}`);
+    if (isAdmin) {
+      navigate(`/admin/courses/${course.id}`);
+    } else {
+      navigate(`/courses/${course.id}`);
+    }
   };
 
   const handleActionClick = (e: React.MouseEvent, action: () => void) => {
@@ -68,26 +76,30 @@ const CourseTableRow: React.FC<CourseTableRowProps> = ({ course }) => {
         )}
       </td>
       <td style={{ padding: '16px', display: 'flex', gap: '16px', alignItems: 'center' }}>
-        <button 
-          onClick={(e) => handleActionClick(e, () => setIsEditModalOpen(true))} 
-          style={{ background: 'none', border: 'none', color: '#4a5568', cursor: 'pointer', padding: 0 }}
-          title="Edit course"
-        >
-          <Edit size={18} />
-        </button>
-        <button 
-          onClick={(e) => handleActionClick(e, handleDelete)} 
-          style={{ background: 'none', border: 'none', color: '#e53e3e', cursor: 'pointer', padding: 0 }}
-          title="Delete course"
-        >
-          <Trash2 size={18} />
-        </button>
+        {isAdmin && (
+          <>
+            <button 
+              onClick={(e) => handleActionClick(e, () => setIsEditModalOpen(true))} 
+              style={{ background: 'none', border: 'none', color: '#4a5568', cursor: 'pointer', padding: 0 }}
+              title="Edit course"
+            >
+              <Edit size={18} />
+            </button>
+            <button 
+              onClick={(e) => handleActionClick(e, handleDelete)} 
+              style={{ background: 'none', border: 'none', color: '#e53e3e', cursor: 'pointer', padding: 0 }}
+              title="Delete course"
+            >
+              <Trash2 size={18} />
+            </button>
 
-        {isEditModalOpen && (
-          <CourseCreate 
-            initialData={course} 
-            onClose={() => setIsEditModalOpen(false)} 
-          />
+            {isEditModalOpen && (
+              <CourseCreate 
+                initialData={course} 
+                onClose={() => setIsEditModalOpen(false)} 
+              />
+            )}
+          </>
         )}
       </td>
     </tr>

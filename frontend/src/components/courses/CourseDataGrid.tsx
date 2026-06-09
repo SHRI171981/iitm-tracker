@@ -1,16 +1,20 @@
 // src/components/courses/CourseDataGrid.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import type { Course } from '@/components/courses/types';
 import { useCourseAdminStore } from '@/stores/useCourseAdminStore';
 import CourseTableHeader from '@/components/courses/CourseTableHeader';
 import CourseTableRow from '@/components/courses/CourseTableRow';
 import CourseCreate from '@/components/courses/CourseCreate';
+import { AuthContext } from '@/contexts/AuthContext';
 
 const CourseDataGrid: React.FC = () => {
   const courses = useCourseAdminStore((state) => state.courses);
   const loading = useCourseAdminStore((state) => state.loading);
   const error = useCourseAdminStore((state) => state.error);
   const fetchCourses = useCourseAdminStore((state) => state.fetchCourses);
+
+  const auth = useContext(AuthContext);
+  const isAdmin = auth?.user?.role === 'admin';
 
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState<'All' | Course['level']>('All');
@@ -69,15 +73,18 @@ const CourseDataGrid: React.FC = () => {
               <option key={level} value={level}>{level}</option>
             ))}
           </select>
-
-          <button 
-            onClick={() => setIsCreateModalOpen(true)}
-            style={{ padding: '12px 24px', backgroundColor: '#4f46e5', color: 'white', border: 'none', borderRadius: '8px', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer', transition: 'background-color 0.2s' }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4338ca'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4f46e5'}
-          >
-            + Add Course
-          </button>
+          { isAdmin && (
+            <>
+              <button 
+                onClick={() => setIsCreateModalOpen(true)}
+                style={{ padding: '12px 24px', backgroundColor: '#4f46e5', color: 'white', border: 'none', borderRadius: '8px', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer', transition: 'background-color 0.2s' }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4338ca'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4f46e5'}
+              >
+                + Add Course
+              </button>
+            </>
+          )}
         </div>
 
       </div>
