@@ -14,6 +14,7 @@ const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   if (!auth?.token || !auth?.user) {
     // Note: Removed the native alert() for better UX. 
     // If you want a toast notification, trigger it from your Login component upon redirect.
+    console.log('Access denied: User is not authenticated. Redirecting to login.');
     return <Navigate to="/login" replace />;
   }
 
@@ -22,6 +23,7 @@ const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   if (allowedRoles && !allowedRoles.includes(auth.user.role)) {
     // The user is logged in, but lacks permission (e.g., a student trying to access /admin)
     // Redirect them to a safe default page or a dedicated "Unauthorized" view.
+    console.log(`Access denied: User role '${auth.user.role}' is not authorized for this route. Redirecting to home.`);
     return <Navigate to="/" replace />; 
   }
 
