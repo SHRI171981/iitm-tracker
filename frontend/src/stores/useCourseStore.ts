@@ -131,12 +131,15 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
     try {
       const response = await apiClient.get(`/week/all/${courseId}`);
       if (response.status === 200) {
-        const fetchedWeeks = response.data;
+        // Sort weeks ascending by the numeric identifier prior to state insertion.
+        const sortedWeeks = response.data.sort((a: Week, b: Week) => a.num - b.num);
+        
         set((state) => ({
-          weeksByCourse: { ...state.weeksByCourse, [courseId]: fetchedWeeks },
+          weeksByCourse: { ...state.weeksByCourse, [courseId]: sortedWeeks },
           fetchingWeeks: { ...state.fetchingWeeks, [courseId]: false }
         }));
-        const lecturePromises = fetchedWeeks.map((week: Week) => get().fetchLectures(week.id));
+        
+        const lecturePromises = sortedWeeks.map((week: Week) => get().fetchLectures(week.id));
         await Promise.all(lecturePromises);
       }
     } catch (error) {
@@ -150,8 +153,11 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
     try {
       const response = await apiClient.get(`/lecture/all/${weekId}`);
       if (response.status === 200) {
+        // Assume a Lecture type exists. Sort lectures ascending by numeric identifier.
+        const sortedLectures = response.data.sort((a: any, b: any) => a.num - b.num);
+        
         set((state) => ({
-          lecturesByWeek: { ...state.lecturesByWeek, [weekId]: response.data },
+          lecturesByWeek: { ...state.lecturesByWeek, [weekId]: sortedLectures },
           fetchingLectures: { ...state.fetchingLectures, [weekId]: false }
         }));
       }
