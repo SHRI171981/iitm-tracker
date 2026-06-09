@@ -1,13 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
-from collections import defaultdict
-from helpers.security import require_roles
-from app import models
+
 from app.database import get_db
 from app.schemas import dependency
-
+from helpers.security import require_roles
+from app.services import dependency_service
 
 router = APIRouter(
     prefix="/api/dependency",
@@ -17,72 +16,49 @@ router = APIRouter(
 
 @router.get("/from/{course_id}", response_model=List[dependency.DependencyBase], dependencies=[Depends(require_roles(["admin", "student"]))])
 async def read_from_dependencies(course_id: UUID, db: Session = Depends(get_db)):
-    _course = db.query(models.Course).filter(models.Course.id == course_id).first()
-    if _course is None:
-        raise HTTPException(status_code=404, detail="Associated course not found")
-    dependencies = db.query(models.Dependency).filter(models.Dependency.from_course_id == course_id).all()
-    return dependencies
+    """
+    Retrieves records where the specified course acts as the prerequisite.
+    """
+    return dependency_service.fetch_from_dependencies(course_id, db)
 
 
 @router.get("/to/{course_id}", response_model=List[dependency.DependencyBase], dependencies=[Depends(require_roles(["admin", "student"]))])
 async def read_to_dependencies(course_id: UUID, db: Session = Depends(get_db)):
-    _course = db.query(models.Course).filter(models.Course.id == course_id).first()
-    if _course is None:
-        raise HTTPException(status_code=404, detail="Associated course not found")
-    dependencies = db.query(models.Dependency).filter(models.Dependency.to_course_id == course_id).all()
-    return dependencies
+    """
+    Retrieves prerequisite records necessary to unlock the specified course.
+    """
+    return dependency_service.fetch_to_dependencies(course_id, db)
 
 
 @router.get("/one/{dependency_id}", response_model=dependency.DependencyBase, dependencies=[Depends(require_roles(["admin", "student"]))])
 async def read_dependency(dependency_id: UUID, db: Session = Depends(get_db)):
-    _dependency = db.query(models.Dependency).filter(models.Dependency.id == dependency_id).first()
-    if _dependency is None:
-        raise HTTPException(status_code=404, detail="Dependency not found")
-    return _dependency
+    """
+    Retrieves the details of a singular dependency binding via its UUID.
+    """
+    return dependency_service.fetch_dependency_by_id(dependency_id, db)
 
 
 @router.get("/all", response_model=List[dependency.DependencyBase], dependencies=[Depends(require_roles(["admin", "student"]))])
 async def read_all_dependencies(db: Session = Depends(get_db)):
-    dependencies = db.query(models.Dependency).all()
-    return dependencies
+    """
+    Retrieves the global map of all defined course dependencies.
+    """
+    return dependency_service.fetch_all_dependencies(db)
 
 
 @router.post("/create", response_model=dependency.DependencyBase, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_roles(["admin"]))])
-async def create_dependency(dependency: dependency.DependencyCreate, db: Session = Depends(get_db)):
-    _from_course = db.query(models.Course).filter(models.Course.id == dependency.from_course_id).first()
-    if _from_course is None:
-        raise HTTPException(status_code=404, detail="From course not found")
-    
-    _to_course = db.query(models.Course).filter(models.Course.id == dependency.to_course_id).first()
-    if _to_course is None:
-        raise HTTPException(status_code=404, detail="To course not found")
-    
-    try:
-        new_dependency = models.Dependency(
-            from_course_id=dependency.from_course_id,
-            to_course_id=dependency.to_course_id
-        )
-        db.add(new_dependency)
-        db.commit()
-        db.refresh(new_dependency)
-        return new_dependency
-    
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
+async def create_dependency(dependency_data: dependency.DependencyCreate, db: Session = Depends(get_db)):
+    """
+    Binds a new prerequisite relationship between two courses.
+    Strictly restricted to administrative execution.
+    """
+    return dependency_service.execute_create_dependency(dependency_data, db)
 
 
 @router.delete("/delete/{dependency_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_roles(["admin"]))])
 async def delete_dependency(dependency_id: UUID, db: Session = Depends(get_db)):
-    _dependency = db.query(models.Dependency).filter(models.Dependency.id == dependency_id).first()
-    if _dependency is None:
-        raise HTTPException(status_code=404, detail="Dependency not found")
-    
-    try:
-        db.delete(_dependency)
-        db.commit()
-    
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
-    
+    """
+    Dissolves an existing prerequisite relationship via its UUID.
+    Strictly restricted to administrative execution.
+    """
+    return dependency_service.execute_delete_dependency(dependency_id, db)
