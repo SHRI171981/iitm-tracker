@@ -30,8 +30,8 @@ class ProgressBase(BaseModel):
 
 
 class ProgressCreate(BaseModel):
-    student_id: UUID = Field(
-        ...,
+    student_id: Optional[UUID] = Field(
+        None,
         description="Identifier for the associated student"
     )
     lecture_id: UUID = Field(
