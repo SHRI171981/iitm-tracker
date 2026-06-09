@@ -1,125 +1,146 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+# app/api/routers/progress.py
+
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
-from helpers.security import require_roles
-from helpers.progress import week_completion, course_completion
-from app import models
+
 from app.database import get_db
 from app.schemas import progress
+from app.schemas.auth import UserResponse
+from helpers.security import require_roles, get_current_user
+from app.services import progress_service 
 
 router = APIRouter(
     prefix="/api/progress",
     tags=["Progress"]
 )
 
+# --- General Progress Endpoints ---
 
-@router.get("/student/all/{student_id}", response_model=List[progress.ProgressBase], dependencies=[Depends(require_roles(["admin", "student"]))])
-async def get_progress_by_student(student_id: UUID, db: Session = Depends(get_db)):
-    student = db.query(models.Student).filter(models.Student.id == student_id).first()
-    if not student:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
-    
-    progress_entries = db.query(models.StudentLecture).filter(models.StudentLecture.student_id == student_id).all()
-    return progress_entries
-
-
-@router.get("/week/{student_id}/{week_id}", response_model=progress.WeekProgress, dependencies=[Depends(require_roles(["admin", "student"]))])
-async def get_progress_by_week(week_id: UUID, student_id: UUID, db: Session = Depends(get_db)):
-    student = db.query(models.Student).filter(models.Student.id == student_id).first()
-    if not student:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
-
-    week = db.query(models.Week).filter(models.Week.id == week_id).first()
-    if not week:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Week not found")
-    
-    week_progress = week_completion(student_id, week, db)
-
-    return progress.WeekProgress(
-        week_id=week_id,
-        num_lectures=week_progress["num_lectures"],
-        completed_lectures=week_progress["completed_lectures"]
-    )
+@router.get("/student/me", response_model=List[progress.ProgressBase])
+async def get_my_progress(
+    current_user: UserResponse = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieves progress records for the authenticated student via JWT identity.
+    """
+    student = progress_service.resolve_student(current_user.user_id, db)
+    return progress_service.fetch_student_progress(student.id, db)
 
 
-@router.get("/course/{student_id}/{course_id}", response_model=progress.CourseProgress, dependencies=[Depends(require_roles(["admin", "student"]))])
-async def get_progress_by_course(course_id: UUID, student_id: UUID, db: Session = Depends(get_db)):
-    course = db.query(models.Course).filter(models.Course.id == course_id).first()
-    if not course:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
-    
-    student = db.query(models.Student).filter(models.Student.id == student_id).first()
-    if not student:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
-
-    course_progress = course_completion(student_id, course, db)
-
-    return progress.CourseProgress(
-        course_id=course_id,
-        num_weeks=course_progress["num_weeks"],
-        completed_weeks=course_progress["completed_weeks"]
-    )
-                                 
-
-@router.post("/record", response_model=progress.ProgressBase, dependencies=[Depends(require_roles(["admin", "student"]))])
-async def record_progress(progress_data: progress.ProgressCreate, db: Session = Depends(get_db)):
-    student = db.query(models.Student).filter(models.Student.id == progress_data.student_id).first()
-    if not student:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
-    lecture = db.query(models.Lecture).filter(models.Lecture.id == progress_data.lecture_id).first()
-    if not lecture:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lecture not found")
-    
-    existing_progress = db.query(models.StudentLecture).filter(
-        models.StudentLecture.student_id == progress_data.student_id,
-        models.StudentLecture.lecture_id == progress_data.lecture_id
-    ).first()
-    if existing_progress:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Progress entry already exists")
-    
-    try: 
-        db_progress = models.StudentLecture(
-            student_id=progress_data.student_id,
-            lecture_id=progress_data.lecture_id,
-        )
-        db.add(db_progress)
-        db.commit()
-        db.refresh(db_progress)
-
-        return progress.ProgressBase(
-            id=db_progress.id,
-            student_id=db_progress.student_id,
-            lecture_id=db_progress.lecture_id, 
-            completed=True,
-            timestamp=db_progress.timestamp
-        )
-
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to record progress: {str(e)}") from e
+@router.get("/student/{student_id}", response_model=List[progress.ProgressBase], dependencies=[Depends(require_roles(["admin"]))])
+async def get_progress_by_student_id(
+    student_id: UUID, 
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieves progress records for a target student. Restricted to administrators.
+    """
+    return progress_service.fetch_student_progress(student_id, db)
 
 
-@router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_roles(["admin", "student"]))])
-async def delete_progress(progress_data: progress.ProgressCreate, db: Session = Depends(get_db)):
-    student = db.query(models.Student).filter(models.Student.id == progress_data.student_id).first()
-    if not student:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
-    lecture = db.query(models.Lecture).filter(models.Lecture.id == progress_data.lecture_id).first()
-    if not lecture:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lecture not found")
-    
-    progress_entry = db.query(models.StudentLecture).filter(
-        models.StudentLecture.student_id == progress_data.student_id,
-        models.StudentLecture.lecture_id == progress_data.lecture_id
-    ).first()
-    
-    if not progress_entry:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Progress entry not found")
-    
-    try:
-        db.delete(progress_entry)
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to delete progress: {str(e)}") from e
+# --- Week Progress Endpoints ---
+@router.get("/week/me/{week_id}", response_model=progress.WeekProgress)
+async def get_my_week_progress(
+    week_id: UUID, 
+    current_user: UserResponse = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieves weekly completion metrics for the authenticated student.
+    """
+    student = progress_service.resolve_student(current_user.user_id, db)
+    return progress_service.fetch_week_progress(student.id, week_id, db)
+
+
+@router.get("/week/{student_id}/{week_id}", response_model=progress.WeekProgress, dependencies=[Depends(require_roles(["admin"]))])
+async def get_student_week_progress(
+    week_id: UUID, 
+    student_id: UUID, 
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieves weekly completion metrics for a target student. Restricted to administrators.
+    """
+    return progress_service.fetch_week_progress(student_id, week_id, db)
+
+
+# --- Course Progress Endpoints ---
+@router.get("/course/me/{course_id}", response_model=progress.CourseProgress)
+async def get_my_course_progress(
+    course_id: UUID, 
+    current_user: UserResponse = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieves course-level completion metrics for the authenticated student.
+    """
+    student = progress_service.resolve_student(current_user.user_id, db)
+    return progress_service.fetch_course_progress(student.id, course_id, db)
+
+
+@router.get("/course/{student_id}/{course_id}", response_model=progress.CourseProgress, dependencies=[Depends(require_roles(["admin"]))])
+async def get_student_course_progress(
+    course_id: UUID, 
+    student_id: UUID, 
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieves course-level completion metrics for a target student. Restricted to administrators.
+    """
+    return progress_service.fetch_course_progress(student_id, course_id, db)
+
+
+# --- Record Progress Endpoints ---
+@router.post("/record/me", response_model=progress.ProgressBase)
+async def record_my_progress(
+    progress_data: progress.ProgressCreate, 
+    current_user: UserResponse = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
+    """
+    Persists a new progress record for the authenticated student.
+    Overrides any externally provided student_id in the payload payload.
+    """
+    student = progress_service.resolve_student(current_user.user_id, db)
+    return progress_service.execute_record_progress(student.id, progress_data.lecture_id, db)
+
+
+@router.post("/record/{student_id}", response_model=progress.ProgressBase, dependencies=[Depends(require_roles(["admin"]))])
+async def record_student_progress(
+    student_id: UUID,
+    progress_data: progress.ProgressCreate, 
+    db: Session = Depends(get_db)
+):
+    """
+    Persists a new progress record for a target student. Restricted to administrators.
+    """
+    return progress_service.execute_record_progress(student_id, progress_data.lecture_id, db)
+
+
+# --- Delete Progress Endpoints ---
+@router.delete("/delete/me", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_my_progress(
+    progress_data: progress.ProgressCreate, 
+    current_user: UserResponse = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
+    """
+    Removes a progress record for the authenticated student.
+    """
+    student = progress_service.resolve_student(current_user.user_id, db)
+    return progress_service.execute_delete_progress(student.id, progress_data.lecture_id, db)
+
+
+@router.delete("/delete/{student_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_roles(["admin"]))])
+async def delete_student_progress(
+    student_id: UUID,
+    progress_data: progress.ProgressCreate, 
+    db: Session = Depends(get_db)
+):
+    """
+    Removes a progress record for a target student. Restricted to administrators.
+    """
+    return progress_service.execute_delete_progress(student_id, progress_data.lecture_id, db)
