@@ -1,15 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+# app/api/routers/course.py
+
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from typing import List
 from uuid import UUID
-from collections import defaultdict
-from helpers.security import get_password_hash, verify_password
-from app import models
+
 from app.database import get_db
 from app.schemas import course
-from scripts.extract_playlist_duration import calculate_total_hours
 from helpers.security import require_roles
+from app.services import course_service
 
 router = APIRouter(
     prefix="/api/course",
@@ -19,74 +18,35 @@ router = APIRouter(
 
 @router.get("/all", response_model=List[course.CourseBase], dependencies=[Depends(require_roles(["admin", "student"]))])
 async def get_courses(db: Session = Depends(get_db)):
-    courses = db.query(models.Course).all()
-    return courses
+    """Retrieves all global course records."""
+    return course_service.fetch_all_courses(db)
 
 
 @router.get("/one/{course_id}", response_model=course.CourseBase, dependencies=[Depends(require_roles(["admin", "student"]))])
 async def get_course(course_id: UUID, db: Session = Depends(get_db)):
-    _course = db.query(models.Course).filter(models.Course.id == course_id).first()
-    if not _course:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
-    return _course
+    """Retrieves a specific course record by its unique identifier."""
+    return course_service.fetch_course_by_id(course_id, db)
 
 
 @router.post("/some", response_model=List[course.CourseBase], dependencies=[Depends(require_roles(["admin", "student"]))])
 async def get_courses_by_ids(course_ids: List[UUID], db: Session = Depends(get_db)):
-    courses = db.query(models.Course).filter(models.Course.id.in_(course_ids)).all()
-    return courses
+    """Retrieves multiple course records based on a provided array of UUIDs."""
+    return course_service.fetch_courses_by_ids(course_ids, db)
 
 
 @router.post("/create", response_model=course.CourseBase, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_roles(["admin"]))])
 async def create_course(course_data: course.CourseCreate, db: Session = Depends(get_db)):
-    existing_course = db.query(models.Course).filter((models.Course.code == course_data.code) | (models.Course.name == course_data.name)).first()
-    if existing_course:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Course code or name already exists")
-    
-    try:
-        new_course = models.Course(**course_data.model_dump())
-        num_hours = await calculate_total_hours(course_data.playlist) if course_data.playlist else None
-        new_course.num_hours = num_hours
-        db.add(new_course)
-        db.commit()
-        db.refresh(new_course)
-        return new_course
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to create course: {str(e)}") from e
+    """Creates a new course entity. Restricted to administrators."""
+    return await course_service.execute_create_course(course_data, db)
 
 
 @router.patch("/update/{course_id}", response_model=course.CourseBase, dependencies=[Depends(require_roles(["admin"]))])
 async def update_course(course_id: UUID, course_data: course.CourseCreate, db: Session = Depends(get_db)):
-    _course = db.query(models.Course).filter(models.Course.id == course_id).first()
-    if not _course:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
-    
-    existing_course = db.query(models.Course).filter((models.Course.code == course_data.code) | (models.Course.name == course_data.name), models.Course.id != course_id).first()
-    if existing_course:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Course code or name already exists")
-    
-    try:
-        for key, value in course_data.model_dump().items():
-            setattr(_course, key, value)
-        _course.num_hours = await calculate_total_hours(course_data.playlist) if course_data.playlist else None
-        db.commit()
-        db.refresh(_course)
-        return _course
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to update course: {str(e)}") from e
-    
+    """Updates an existing course entity. Restricted to administrators."""
+    return await course_service.execute_update_course(course_id, course_data, db)
+
 
 @router.delete("/delete/{course_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_roles(["admin"]))])
 async def delete_course(course_id: UUID, db: Session = Depends(get_db)):
-    _course = db.query(models.Course).filter(models.Course.id == course_id).first()
-    if not _course:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
-    
-    try:
-        db.delete(_course)
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to delete course: {str(e)}") from e
+    """Removes a course entity. Restricted to administrators."""
+    return course_service.execute_delete_course(course_id, db)
