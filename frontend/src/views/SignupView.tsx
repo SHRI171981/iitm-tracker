@@ -34,7 +34,7 @@ export default function SignupView() {
 
     try {
       // Adjust this endpoint based on your FastAPI routing
-      await apiClient.post('/auth/signup', {
+      await apiClient.post('/auth/register', {
         username: formData.username,
         name: formData.name,
         email: formData.email,
