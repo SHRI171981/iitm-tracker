@@ -33,7 +33,7 @@ app.include_router(progress.router)
 app.include_router(dependency.router)
 
 
-@app.get("/api/health")
+@app.get("/")
 def health_check():
     """Validates application and routing availability."""
     return {"status": "active"}
